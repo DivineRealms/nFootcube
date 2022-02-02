@@ -3,7 +3,7 @@ plugins {
 }
 
 group "io.github.divinerealms"
-version "1.0.0-b174"
+version "1.0.0-b175"
 
 repositories {
     mavenCentral()

@@ -71,7 +71,7 @@ public class Controller implements Listener {
     Entity[] entities;
     for (int length = (entities = event.getChunk().getEntities()).length, i = 0; i < length; ++i) {
       Entity entity = entities[i];
-      if (entity instanceof Slime && this.cubes.contains((Slime) cubes)) {
+      if (entity instanceof Slime && this.cubes.contains(entity)) {
         this.cubes.remove((Slime) entity);
         entity.remove();
       }
