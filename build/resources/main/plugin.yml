@@ -1,9 +1,9 @@
 name: nFootcube
-version: 1.0.0-b168
+version: 1.0.0-b174
 authors:
   - SmileyCraft
   - Neeonn
-main: me.neon.footcube.Footcube
+main: io.github.divinerealms.footcube.Footcube
 softdepend:
   - Vault
 commands:
