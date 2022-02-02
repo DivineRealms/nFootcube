@@ -1,6 +1,6 @@
-package me.neon.footcube.listeners;
+package io.github.divinerealms.footcube.listeners;
 
-import me.neon.footcube.Footcube;
+import io.github.divinerealms.footcube.Footcube;
 import org.bukkit.EntityEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;

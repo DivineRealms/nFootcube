@@ -2,8 +2,8 @@ plugins {
     id "java"
 }
 
-group "me.neon"
-version "1.0.0"
+group "io.github.divinerealms"
+version "1.0.0-vb174"
 
 repositories {
     mavenCentral()

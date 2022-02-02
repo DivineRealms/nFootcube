@@ -1,9 +1,9 @@
-package me.neon.footcube;
+package io.github.divinerealms.footcube;
 
-import me.neon.footcube.listeners.Controller;
-import me.neon.footcube.utils.Commands;
-import me.neon.footcube.utils.Configuration;
-import me.neon.footcube.utils.Manager;
+import io.github.divinerealms.footcube.listeners.Controller;
+import io.github.divinerealms.footcube.utils.Commands;
+import io.github.divinerealms.footcube.utils.Configuration;
+import io.github.divinerealms.footcube.utils.Manager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;

@@ -1,6 +1,6 @@
-package me.neon.footcube.utils;
+package io.github.divinerealms.footcube.utils;
 
-import me.neon.footcube.Footcube;
+import io.github.divinerealms.footcube.Footcube;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
