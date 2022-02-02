@@ -47,21 +47,21 @@ public class Commands implements CommandExecutor, TabCompleter {
       if (command.getName().equalsIgnoreCase("cube")) {
         if (player.hasPermission("nfootcube.cube")) {
           Location loc = player.getLocation().add(0.0, 1.5, 0.0);
-          if (this.manager.getController().immuneMap.containsKey(player)) {
-            Bukkit.getScheduler().cancelTask(this.manager.getController().immuneMap.get(player).getTaskId());
-            this.manager.getController().immuneMap.remove(player);
-            this.manager.getController().immune.remove(player);
+          if (this.plugin.getController().immuneMap.containsKey(player)) {
+            Bukkit.getScheduler().cancelTask(this.plugin.getController().immuneMap.get(player).getTaskId());
+            this.plugin.getController().immuneMap.remove(player);
+            this.plugin.getController().immune.remove(player);
           }
 
-          this.manager.getController().immune.add(player);
+          this.plugin.getController().immune.add(player);
 
           BukkitTask taskID = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-            this.manager.getController().immune.remove(player);
-            this.manager.getController().immuneMap.remove(player);
+            this.plugin.getController().immune.remove(player);
+            this.plugin.getController().immuneMap.remove(player);
           }, 60L);
 
-          this.manager.getController().immuneMap.put(player, taskID);
-          this.manager.getController().spawnCube(loc);
+          this.plugin.getController().immuneMap.put(player, taskID);
+          this.plugin.getController().spawnCube(loc);
           this.sendMessage(player, "CUBE_SPAWNED", "", 0);
         } else this.sendMessage(player, "INSUFFICIENT_PERMISSION", "nfootcube.cube", 0);
         return true;
@@ -70,11 +70,11 @@ public class Commands implements CommandExecutor, TabCompleter {
       if (command.getName().equalsIgnoreCase("clearcube")) {
         if (player.hasPermission("nfootcube.clearcube")) {
           final double distance = this.plugin.getConfig().getDouble("distance");
-          if (!this.manager.getController().cubes.isEmpty()) {
-            for (Slime cube : this.manager.getController().cubes) {
-              if (this.manager.getController().getDistance(cube.getLocation(), player.getLocation()) < distance) {
+          if (!this.plugin.getController().cubes.isEmpty()) {
+            for (Slime cube : this.plugin.getController().cubes) {
+              if (this.plugin.getController().getDistance(cube.getLocation(), player.getLocation()) < distance) {
                 cube.setHealth(0.0D);
-                this.manager.getController().cubes.remove(cube);
+                this.plugin.getController().cubes.remove(cube);
                 this.sendMessage(player, "CUBE_CLEARED", "", 0);
                 break;
               } else this.sendMessage(player, "CUBE_NOTCLEARED", "", 0);

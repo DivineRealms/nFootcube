@@ -38,7 +38,6 @@ public class Configuration {
     }
   }
 
-  @SuppressWarnings("unused")
   public void saveMessages() {
     if (this.messages == null || this.file == null) return;
 

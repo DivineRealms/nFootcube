@@ -1,8 +1,10 @@
 package me.neon.footcube.listeners;
 
 import me.neon.footcube.Footcube;
-import me.neon.footcube.utils.Manager;
-import org.bukkit.*;
+import org.bukkit.EntityEffect;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -25,20 +27,18 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class Controller implements Listener {
-  public final ArrayList<Player> immune;
-  public final HashMap<Player, BukkitTask> immuneMap;
   private final Footcube plugin;
-  private final Manager manager;
+  public HashSet<Slime> cubes;
   private final HashMap<UUID, Vector> velocities;
   private final HashMap<UUID, Long> kicked;
   private final HashMap<UUID, Double> speed;
   private final HashMap<UUID, Double> charges;
   private final Sound sound;
-  public HashSet<Slime> cubes;
+  public final ArrayList<Player> immune;
+  public final HashMap<Player, BukkitTask> immuneMap;
 
-  public Controller(Footcube plugin, Manager manager) {
+  public Controller(Footcube plugin) {
     this.plugin = plugin;
-    this.manager = manager;
     this.cubes = new HashSet<>();
     this.velocities = new HashMap<>();
     this.kicked = new HashMap<>();
@@ -47,6 +47,7 @@ public class Controller implements Listener {
     this.sound = Sound.SLIME_WALK;
     this.immune = new ArrayList<>();
     this.immuneMap = new HashMap<>();
+    this.removeCubes();
   }
 
   @EventHandler
@@ -70,10 +71,11 @@ public class Controller implements Listener {
     Entity[] entities;
     for (int length = (entities = event.getChunk().getEntities()).length, i = 0; i < length; ++i) {
       Entity entity = entities[i];
-      if (entity instanceof Slime) this.cubes.remove((Slime) entity);
+      if (entity instanceof Slime && this.cubes.contains((Slime) cubes)) {
+        this.cubes.remove((Slime) entity);
+        entity.remove();
+      }
     }
-
-    this.removeUnusedCubes();
   }
 
   @EventHandler(priority = EventPriority.HIGH)
@@ -255,10 +257,10 @@ public class Controller implements Listener {
     }
   }
 
-  public void removeUnusedCubes() {
-    for (Entity entity : Bukkit.getServer().getWorlds().get(0).getEntities())
-      if (entity instanceof Slime)
-        if (!this.manager.getController().cubes.contains((Slime) entity))
-          entity.remove();
+  public void removeCubes() {
+    List<Entity> entities = this.plugin.getServer().getWorlds().get(0).getEntities();
+
+    for (Entity entity : entities)
+      if (entity instanceof Slime && this.cubes.contains((Slime) entity)) entity.remove();
   }
 }
