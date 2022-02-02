@@ -69,11 +69,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 
       if (command.getName().equalsIgnoreCase("clearcube")) {
         if (player.hasPermission("nfootcube.clearcube")) {
-          final double distance = 20.0;
+          final double distance = this.plugin.getConfig().getDouble("distance");
           if (!this.manager.getController().cubes.isEmpty()) {
             for (Slime cube : this.manager.getController().cubes) {
               if (this.manager.getController().getDistance(cube.getLocation(), player.getLocation()) < distance) {
-                cube.setHealth(0.0);
+                cube.setHealth(0.0D);
                 this.manager.getController().cubes.remove(cube);
                 this.sendMessage(player, "CUBE_CLEARED", "", 0);
                 break;
