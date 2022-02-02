@@ -2,10 +2,7 @@ package me.neon.footcube.listeners;
 
 import me.neon.footcube.Footcube;
 import me.neon.footcube.utils.Manager;
-import org.bukkit.EntityEffect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -259,7 +256,7 @@ public class Controller implements Listener {
   }
 
   public void removeUnusedCubes() {
-    for (Entity entity : this.plugin.getServer().getWorld("world").getEntities())
+    for (Entity entity : Bukkit.getServer().getWorlds().get(0).getEntities())
       if (entity instanceof Slime)
         if (!this.manager.getController().cubes.contains((Slime) entity))
           entity.remove();
