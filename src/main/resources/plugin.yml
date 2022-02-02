@@ -1,0 +1,16 @@
+name: nFootcube
+version: 1.0.0-b162
+authors:
+  - SmileyCraft
+  - Neeonn
+main: me.neon.footcube.Footcube
+softdepend:
+  - Vault
+commands:
+  nfootcube:
+    description: Base command for Footcube.
+    aliases: [nfc]
+  cube:
+    description: Spawning a ball.
+  clearcube:
+    description: Removes the nearest ball.

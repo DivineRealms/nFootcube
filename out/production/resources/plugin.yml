@@ -1,0 +1,8 @@
+name: Footcube
+version: 1.0.0
+authors:
+  - SmileyCraft
+  - Neeonn
+main: me.neon.footcube.Footcube
+softdepend:
+  - Vault
