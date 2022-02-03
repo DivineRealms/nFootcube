@@ -38,11 +38,6 @@ public class Commands implements CommandExecutor, TabCompleter {
               this.plugin.reload();
               this.sendMessage(player, "RELOAD", "", 0);
             } else this.sendMessage(player, "INSUFFICIENT_PERMISSION", "nfootcube.reload", 0);
-          } else if (args[0].equalsIgnoreCase("restart")) {
-            if (player.hasPermission("nfootcube.admin")) {
-              this.plugin.restart();
-              this.sendMessage(player, "RESTART", "", 0);
-            } else this.sendMessage(player, "INSUFFICIENT_PERMISSION", "nfootcube.admin", 0);
           } else if (args[0].equalsIgnoreCase("help")) this.sendMessage(player, "HELP", "", 1);
           else this.sendMessage(player, "UNKNOWN_COMMAND", "", 0);
         } else this.sendMessage(player, "HELP", "", 1);
@@ -93,9 +88,6 @@ public class Commands implements CommandExecutor, TabCompleter {
           if (args[0].equalsIgnoreCase("reload")) {
             this.plugin.reload();
             this.manager.getLogger().log("RELOAD");
-          } else if (args[0].equalsIgnoreCase("restart")) {
-            this.plugin.restart();
-            this.manager.getLogger().log("RESTART");
           } else this.manager.getLogger().log("UNKNOWN_COMMAND");
         } else this.manager.getLogger().logL("HELP");
       }
@@ -130,7 +122,6 @@ public class Commands implements CommandExecutor, TabCompleter {
         if (sender.hasPermission("nfootcube.admin")) {
           list.add("help");
           list.add("reload");
-          list.add("restart");
         } else {
           list.add("help");
         }
