@@ -1,18 +1,18 @@
-PREFIX: "&8[&b&lFUT&8] &b"
-RELOAD: "%prefix%&aKonfiguracija plugina uspešno osvežena!"
-RESTART: "%prefix%&aPlugin uspešno osvežen (trajalo %time%ms)! &c&lOva komanda restartuje plugin."
-UNKNOWN_COMMAND: "%prefix%&cNepoznata komanda."
-CUBE_SPAWNED: "%prefix%&aLopta stvorena."
-CUBE_CLEARED: "%prefix%&aLopta obrisana."
-CUBE_NOTCLEARED: "%prefix%&cNema lopti u blizini."
-INSUFFICIENT_PERMISSION: "%prefix%&cNemate dozvolu za to (%permission%)."
+PREFIX: '&8[&b&lFUT&8] &b'
+RELOAD: '%prefix%&aKonfiguracije plugina uspešno osvežene!'
+RESTART: '%prefix%&aPlugin uspešno osvežen (trajalo %time%ms)! &c&lOva komanda restartuje plugin.'
+UNKNOWN_COMMAND: '%prefix%&cNepoznata komanda.'
+CUBE_SPAWNED: '%prefix%&aLopta stvorena.'
+CUBE_CLEARED: '%prefix%&aLopta obrisana.'
+CUBE_NOTCLEARED: '%prefix%&cNema lopti u blizini.'
+INSUFFICIENT_PERMISSION: '%prefix%&cNemate dozvolu za to (%permission%).'
 HELP:
-  - "&8&m-----------------------------------------------------&r"
-  - "&r &r"
-  - "&b &lFUT CRAFT &7// &e&oLista komandi."
-  - "&r &r"
-  - "&6 /&e1v1 &6/&e2v2 &6/&e3v3 &6/&e4v4&7: &oUlaz u igru."
-  - "&6 /&estats &6/&ebest&7: &oStatistika igrača"
-  - "&6 /&eteam &2<&amod&2> &2<&aimeIgrača&2>"
-  - "&r &r"
-  - "&8&m-----------------------------------------------------&r"
+  - '&8&m-----------------------------------------------------&r'
+  - '&b &lFUT CRAFT&7 - &e&oLista dostupnih komandi.'
+  - '&r &r'
+  - '&6 /&enfc help&7: &fPrikazuje ovu stranicu.'
+  - '&6 /&enfc reload&7: &fOsvežavanje plugina.'
+  - '&6 /&enfc restart&7: &fRestart plugina.'
+  - '&6 /&ecube&7: &fStvaranje lopte.'
+  - '&6 /&eclearcube&7: &fBrisanje lopte u radiusu.'
+  - '&8&m-----------------------------------------------------&r'
