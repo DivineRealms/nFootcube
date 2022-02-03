@@ -251,7 +251,7 @@ public class Controller implements Listener {
         cube.setHealth(1.0D);
         cube.setVelocity(newV);
         cube.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 10, -3, true), true);
-        cube.playEffect(EntityEffect.HURT);
+        //cube.playEffect(EntityEffect.HURT);
         this.velocities.put(id, newV);
       } else cubesIterator.remove();
     }

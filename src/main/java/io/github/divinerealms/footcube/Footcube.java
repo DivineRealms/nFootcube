@@ -12,6 +12,7 @@ public class Footcube extends JavaPlugin {
   private Manager manager;
   private Controller controller;
   private Configuration configuration;
+  private long timeAtStart = System.currentTimeMillis();
 
   @Override
   public void onDisable() {
@@ -21,21 +22,11 @@ public class Footcube extends JavaPlugin {
 
   @Override
   public void onEnable() {
-    long timeAtStart = System.currentTimeMillis();
-
     this.configuration = new Configuration(this);
     this.controller = new Controller(this);
 
     this.saveDefaultConfig();
-    this.reload();
-
-    this.getLogger().log(Level.INFO, "Loading commands...");
-    this.getLogger().log(Level.INFO, "Loading listeners...");
-    this.manager.getLogger().setLogo();
-    this.getLogger().log(Level.INFO, "Successfully enabled! (took " + (System.currentTimeMillis() - timeAtStart) + "ms)");
-
-    this.getServer().getPluginManager().registerEvents(this.getController(), this);
-    this.getServer().getScheduler().runTaskTimer(this, this.getController()::update, 0L, 1L);
+    this.restart();
   }
 
   public void reload() {
@@ -52,8 +43,25 @@ public class Footcube extends JavaPlugin {
     this.getCommand("clearcube").setExecutor(commands);
   }
 
+  public void restart() {
+    this.timeAtStart = System.currentTimeMillis();
+    this.reload();
+
+    this.getLogger().log(Level.INFO, "Loading commands...");
+    this.getLogger().log(Level.INFO, "Loading listeners...");
+    this.manager.getLogger().setLogo();
+    this.getLogger().log(Level.INFO, "Successfully enabled! (took " + (System.currentTimeMillis() - getTimeAtStart()) + "ms)");
+
+    this.getServer().getPluginManager().registerEvents(this.getController(), this);
+    this.getServer().getScheduler().runTaskTimer(this, this.getController()::update, 0L, 1L);
+  }
+
   public Controller getController() {
     return this.controller;
+  }
+
+  public long getTimeAtStart() {
+    return this.timeAtStart;
   }
 }
 

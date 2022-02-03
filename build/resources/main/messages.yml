@@ -1,5 +1,6 @@
 PREFIX: "&8[&b&lFUT&8] &b"
 RELOAD: "%prefix%&aKonfiguracija plugina uspešno osvežena!"
+RESTART: "%prefix%&aPlugin uspešno osvežen (trajalo %time%ms)! &c&lOva komanda restartuje plugin."
 UNKNOWN_COMMAND: "%prefix%&cNepoznata komanda."
 CUBE_SPAWNED: "%prefix%&aLopta stvorena."
 CUBE_CLEARED: "%prefix%&aLopta obrisana."

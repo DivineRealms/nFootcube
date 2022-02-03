@@ -7,19 +7,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Manager {
+  private final Footcube plugin;
   private final Configuration configuration;
   private final Logger logger;
   private final String prefix;
 
   public Manager(Footcube plugin) {
-    this.configuration = new Configuration(plugin);
+    this.plugin = plugin;
+    this.configuration = new Configuration(this.plugin);
     this.logger = new Logger(plugin, this);
     this.prefix = this.configuration.get().getString("PREFIX");
   }
 
   public String color(String message) {
     message = this.configuration.get().getString(message);
-    message = message.replace("%prefix%", this.prefix);
+    message = message
+        .replace("%prefix%", this.prefix)
+        .replace("%time%", String.valueOf(System.currentTimeMillis() - this.plugin.getTimeAtStart()));
     return ChatColor.translateAlternateColorCodes('&', message);
   }
 
@@ -27,7 +31,8 @@ public class Manager {
     message = this.configuration.get().getString(message);
     message = message
         .replace("%prefix%", this.prefix)
-        .replace("%permission%", permission);
+        .replace("%permission%", permission)
+        .replace("%time%", String.valueOf(System.currentTimeMillis() - this.plugin.getTimeAtStart()));
     return ChatColor.translateAlternateColorCodes('&', message);
   }
 
