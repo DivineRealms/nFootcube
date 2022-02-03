@@ -41,6 +41,8 @@ public class Footcube extends JavaPlugin {
     this.getCommand("nfootcube").setTabCompleter(commands);
     this.getCommand("cube").setExecutor(commands);
     this.getCommand("clearcube").setExecutor(commands);
+
+    this.timeAtStart = System.currentTimeMillis();
   }
 
   public void restart() {
