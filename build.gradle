@@ -21,3 +21,8 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+release {
+    failOnCommitNeeded = false
+    failOnSnapshotDependencies = false
+}
