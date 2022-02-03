@@ -25,4 +25,5 @@ test {
 release {
     failOnCommitNeeded = false
     failOnSnapshotDependencies = false
+    tagTemplate = '${version}-b177'
 }
