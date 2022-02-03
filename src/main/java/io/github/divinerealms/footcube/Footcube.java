@@ -30,6 +30,8 @@ public class Footcube extends JavaPlugin {
   }
 
   public void reload() {
+    this.timeAtStart = System.currentTimeMillis();
+
     this.reloadConfig();
     this.configuration.reloadMessages();
     this.configuration.get().options().copyDefaults(true);
@@ -41,8 +43,6 @@ public class Footcube extends JavaPlugin {
     this.getCommand("nfootcube").setTabCompleter(commands);
     this.getCommand("cube").setExecutor(commands);
     this.getCommand("clearcube").setExecutor(commands);
-
-    this.timeAtStart = System.currentTimeMillis();
   }
 
   public void restart() {
