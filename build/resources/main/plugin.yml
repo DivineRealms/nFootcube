@@ -1,16 +1,17 @@
 name: nFootcube
-version: 1.0.0-b193
+version: 1.0.0-b194
 authors:
   - SmileyCraft
   - Neeonn
 main: io.github.divinerealms.footcube.Footcube
+api-version: 1.8
 softdepend:
   - Vault
   - PlaceholderAPI
 commands:
   nfootcube:
     description: Base command for Footcube.
-    aliases: [nfc]
+    aliases: [nfc,fc,footcube]
   cube:
     description: Spawning a ball.
   clearcube:

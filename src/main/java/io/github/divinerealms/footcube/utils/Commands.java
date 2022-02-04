@@ -16,11 +16,11 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 
 public class Commands implements CommandExecutor, TabCompleter {
+  private static int COOLDOWN;
   private final Footcube plugin;
   private final Manager manager;
   private final Configuration configuration;
   private final Map<UUID, Integer> cooldowns = new HashMap<>();
-  private static int COOLDOWN;
 
   public Commands(Footcube plugin, Manager manager, Configuration configuration) {
     this.plugin = plugin;
@@ -52,7 +52,7 @@ public class Commands implements CommandExecutor, TabCompleter {
           int timeLeft = this.getCooldown(player.getUniqueId());
 
           if (timeLeft == 0) {
-            Location loc = player.getLocation().add(0.0, 1.5, 0.0);
+            Location loc = player.getLocation().add(0.0, 1.0, 0.0);
             if (this.plugin.getController().immuneMap.containsKey(player)) {
               Bukkit.getScheduler().cancelTask(this.plugin.getController().immuneMap.get(player).getTaskId());
               this.plugin.getController().immuneMap.remove(player);
@@ -81,9 +81,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             }.runTaskTimer(this.plugin, 20, 20);
           } else {
             String prefix = this.configuration.get().getString("PREFIX");
-            String onCooldown = this.configuration.get().getString("ON_COOLDOWN")
-                .replace("%prefix%", prefix)
-                .replace("%timeleft%", String.valueOf(timeLeft));
+            String onCooldown = this.configuration.get().getString("ON_COOLDOWN").replace("%prefix%", prefix).replace("%timeleft%", String.valueOf(timeLeft));
 
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', onCooldown));
           }
@@ -106,7 +104,7 @@ public class Commands implements CommandExecutor, TabCompleter {
           } else this.sendMessage(player, "CUBE_NOTCLEARED", "", 0);
         } else this.sendMessage(player, "INSUFFICIENT_PERMISSION", "nfootcube.clearcube", 0);
       }
-     } else {
+    } else {
       if (command.getName().equalsIgnoreCase("nfootcube")) {
         if (args.length == 1) {
           if (args[0].equalsIgnoreCase("reload")) {
