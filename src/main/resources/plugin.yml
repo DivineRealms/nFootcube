@@ -1,11 +1,12 @@
 name: nFootcube
-version: 1.0.0-b180
+version: 1.0.0-b193
 authors:
   - SmileyCraft
   - Neeonn
 main: io.github.divinerealms.footcube.Footcube
 softdepend:
   - Vault
+  - PlaceholderAPI
 commands:
   nfootcube:
     description: Base command for Footcube.

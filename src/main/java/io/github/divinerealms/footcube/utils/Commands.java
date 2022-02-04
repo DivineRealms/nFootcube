@@ -10,20 +10,23 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Commands implements CommandExecutor, TabCompleter {
   private final Footcube plugin;
   private final Manager manager;
   private final Configuration configuration;
+  private final Map<UUID, Integer> cooldowns = new HashMap<>();
+  private static int COOLDOWN;
 
   public Commands(Footcube plugin, Manager manager, Configuration configuration) {
     this.plugin = plugin;
     this.manager = manager;
     this.configuration = configuration;
+    COOLDOWN = this.plugin.getConfig().getInt("cooldown");
   }
 
   @Override
@@ -46,23 +49,44 @@ public class Commands implements CommandExecutor, TabCompleter {
 
       if (command.getName().equalsIgnoreCase("cube")) {
         if (player.hasPermission("nfootcube.cube")) {
-          Location loc = player.getLocation().add(0.0, 1.5, 0.0);
-          if (this.plugin.getController().immuneMap.containsKey(player)) {
-            Bukkit.getScheduler().cancelTask(this.plugin.getController().immuneMap.get(player).getTaskId());
-            this.plugin.getController().immuneMap.remove(player);
-            this.plugin.getController().immune.remove(player);
+          int timeLeft = this.getCooldown(player.getUniqueId());
+
+          if (timeLeft == 0) {
+            Location loc = player.getLocation().add(0.0, 1.5, 0.0);
+            if (this.plugin.getController().immuneMap.containsKey(player)) {
+              Bukkit.getScheduler().cancelTask(this.plugin.getController().immuneMap.get(player).getTaskId());
+              this.plugin.getController().immuneMap.remove(player);
+              this.plugin.getController().immune.remove(player);
+            }
+
+            this.plugin.getController().immune.add(player);
+
+            BukkitTask taskID = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+              this.plugin.getController().immune.remove(player);
+              this.plugin.getController().immuneMap.remove(player);
+            }, 60L);
+
+            this.plugin.getController().immuneMap.put(player, taskID);
+            this.plugin.getController().spawnCube(loc);
+            this.sendMessage(player, "CUBE_SPAWNED", "", 0);
+            this.setCooldown(player.getUniqueId(), COOLDOWN);
+
+            new BukkitRunnable() {
+              @Override
+              public void run() {
+                int timeLeft = getCooldown(player.getUniqueId());
+                setCooldown(player.getUniqueId(), --timeLeft);
+                if (timeLeft == 0) this.cancel();
+              }
+            }.runTaskTimer(this.plugin, 20, 20);
+          } else {
+            String prefix = this.configuration.get().getString("PREFIX");
+            String onCooldown = this.configuration.get().getString("ON_COOLDOWN")
+                .replace("%prefix%", prefix)
+                .replace("%timeleft%", String.valueOf(timeLeft));
+
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', onCooldown));
           }
-
-          this.plugin.getController().immune.add(player);
-
-          BukkitTask taskID = Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
-            this.plugin.getController().immune.remove(player);
-            this.plugin.getController().immuneMap.remove(player);
-          }, 60L);
-
-          this.plugin.getController().immuneMap.put(player, taskID);
-          this.plugin.getController().spawnCube(loc);
-          this.sendMessage(player, "CUBE_SPAWNED", "", 0);
         } else this.sendMessage(player, "INSUFFICIENT_PERMISSION", "nfootcube.cube", 0);
         return true;
       }
@@ -129,5 +153,14 @@ public class Commands implements CommandExecutor, TabCompleter {
       return list;
     }
     return null;
+  }
+
+  private void setCooldown(UUID player, int time) {
+    if (time < 1) cooldowns.remove(player);
+    else cooldowns.put(player, time);
+  }
+
+  private int getCooldown(UUID player) {
+    return cooldowns.getOrDefault(player, 0);
   }
 }

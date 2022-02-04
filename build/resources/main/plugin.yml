@@ -6,6 +6,7 @@ authors:
 main: io.github.divinerealms.footcube.Footcube
 softdepend:
   - Vault
+  - PlaceholderAPI
 commands:
   nfootcube:
     description: Base command for Footcube.

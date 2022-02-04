@@ -16,6 +16,7 @@ public class Footcube extends JavaPlugin {
 
   @Override
   public void onDisable() {
+    this.saveConfig();
     this.configuration.saveMessages();
     this.getController().removeCubes();
   }

@@ -4,6 +4,7 @@ UNKNOWN_COMMAND: '%prefix%&cNepoznata komanda.'
 CUBE_SPAWNED: '%prefix%&aLopta stvorena.'
 CUBE_CLEARED: '%prefix%&aLopta obrisana.'
 CUBE_NOTCLEARED: '%prefix%&cNema lopti u blizini.'
+ON_COOLDOWN: '%prefix%&cProbajte ovu komandu ponovo za %timeleft% sekundi.'
 INSUFFICIENT_PERMISSION: '%prefix%&cNemate dozvolu za to (%permission%).'
 HELP:
   - '&8&m-----------------------------------------------------&r'

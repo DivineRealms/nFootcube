@@ -1,1 +1,9 @@
 distance: 100
+cooldown:
+  commands: 15
+  kick: 0.25
+maxPower:
+  regular: 1.5
+  charged: 1.0
+kickPower: 1.0
+redBall: false

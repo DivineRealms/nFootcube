@@ -1,10 +1,8 @@
 package io.github.divinerealms.footcube.listeners;
 
 import io.github.divinerealms.footcube.Footcube;
-import org.bukkit.EntityEffect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -24,6 +22,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class Controller implements Listener {
@@ -108,21 +107,52 @@ public class Controller implements Listener {
     }
   }
 
+  private Double format(Double value) {
+    DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    value = Double.parseDouble(decimalFormat.format(value));
+    return value;
+  }
+
   @EventHandler
   public void onSlamSlime(EntityDamageByEntityEvent event) {
     if (event.getEntity() instanceof Slime && this.cubes.contains((Slime) event.getEntity()) && event.getDamager() instanceof Player && event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
       Slime cube = (Slime) event.getEntity();
       Player player = (Player) event.getDamager();
+
       double charge = 1.0D;
+      double power = 0.4D;
+      double maxPowerRegular = this.plugin.getConfig().getDouble("maxPower.regular");
+      double maxPowerCharged = this.plugin.getConfig().getDouble("maxPower.charged");
+      double kickPower = this.plugin.getConfig().getDouble("kickPower");
+
+      Vector kick;
 
       if (this.charges.containsKey(player.getUniqueId())) charge += this.charges.get(player.getUniqueId()) * 7.0D;
+      if (this.speed.containsKey(player.getUniqueId())) power += this.speed.get(player.getUniqueId()) * 2.0D + 0.4D;
 
-      double power = this.speed.get(player.getUniqueId()) * 2.0D + 0.4D;
-      Vector kick = player.getLocation().getDirection().normalize().multiply(power * charge * (1.0D + 0.05D * 0.025D)).setY(0.3D);
+      if (charge > 1.0D) {
+        if (power >= maxPowerCharged && charge > 2.0D)
+          kick = player.getLocation().getDirection().normalize().multiply(maxPowerCharged * charge * kickPower).setY(0.3D);
+        else
+          kick = player.getLocation().getDirection().normalize().multiply(power * charge * kickPower).setY(0.3D);
+      } else if (power >= maxPowerRegular && charge <= 2.0D)
+        kick = player.getLocation().getDirection().normalize().multiply(maxPowerRegular * charge * kickPower).setY(0.3D);
+      else
+        kick = player.getLocation().getDirection().normalize().multiply(power * charge * kickPower).setY(0.3D);
+
+      String message = colorize(
+          "&6&l[&e&lDEBUG&6&l]&r &b" + player.getName() + " %player_colored_ping%ms" +
+              "&7 (&fPower &a" + format(power) + "&7)" +
+              "&7 (&fCharge &a" + format(charge) + "&7)" +
+              "&7 (&fKick Power &a" + format(maxPowerCharged * charge * kickPower) + "&7)");
+
+      message = PlaceholderAPI.setPlaceholders(player, message);
+      this.plugin.getServer().broadcastMessage(message);
+
+      //this.organization.ballTouch(player);
 
       cube.setVelocity(cube.getVelocity().add(kick));
       cube.getWorld().playSound(cube.getLocation(), this.sound, 1.0F, 1.0F);
-      //this.organization.ballTouch(player);
       event.setCancelled(true);
     }
   }
@@ -251,7 +281,10 @@ public class Controller implements Listener {
         cube.setHealth(1.0D);
         cube.setVelocity(newV);
         cube.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 10, -3, true), true);
-        //cube.playEffect(EntityEffect.HURT);
+
+        if (this.plugin.getConfig().getBoolean("redBall"))
+          cube.playEffect(EntityEffect.HURT);
+
         this.velocities.put(id, newV);
       } else cubesIterator.remove();
     }
@@ -262,5 +295,9 @@ public class Controller implements Listener {
 
     for (Entity entity : entities)
       if (entity instanceof Slime && this.cubes.contains((Slime) entity)) entity.remove();
+  }
+
+  private String colorize(String message) {
+    return ChatColor.translateAlternateColorCodes('&', message);
   }
 }
