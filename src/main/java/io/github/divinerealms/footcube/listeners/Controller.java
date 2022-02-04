@@ -25,17 +25,18 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 public class Controller implements Listener {
-  public final ArrayList<Player> immune;
-  public final HashMap<Player, BukkitTask> immuneMap;
   private final Footcube plugin;
+  public HashSet<Slime> cubes;
   private final HashMap<UUID, Vector> velocities;
   private final HashMap<UUID, Long> kicked;
   private final HashMap<UUID, Double> speed;
   private final HashMap<UUID, Double> charges;
-  public HashSet<Slime> cubes;
-  double maxPowerRegular;
-  double maxPowerCharged;
-  double kickPower;
+  public final ArrayList<Player> immune;
+  public final HashMap<Player, BukkitTask> immuneMap;
+  private final double maxPowerRegular;
+  private final double maxPowerCharged;
+  private final double kickPower;
+  private final boolean redBall;
 
   public Controller(Footcube plugin) {
     this.plugin = plugin;
@@ -49,6 +50,7 @@ public class Controller implements Listener {
     this.maxPowerRegular = this.plugin.getConfig().getDouble("maxPower.regular");
     this.maxPowerCharged = this.plugin.getConfig().getDouble("maxPower.charged");
     this.kickPower = this.plugin.getConfig().getDouble("kickPower");
+    this.redBall = this.plugin.getConfig().getBoolean("redBall");
     this.removeCubes();
   }
 
@@ -275,7 +277,7 @@ public class Controller implements Listener {
         cube.setVelocity(newV);
         cube.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 10, -3, true), true);
 
-        if (this.plugin.getConfig().getBoolean("redBall")) cube.playEffect(EntityEffect.HURT);
+        if (this.redBall) cube.playEffect(EntityEffect.HURT);
 
         this.velocities.put(id, newV);
       } else cubesIterator.remove();

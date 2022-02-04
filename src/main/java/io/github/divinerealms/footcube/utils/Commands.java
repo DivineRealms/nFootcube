@@ -21,12 +21,18 @@ public class Commands implements CommandExecutor, TabCompleter {
   private final Manager manager;
   private final Configuration configuration;
   private final Map<UUID, Integer> cooldowns = new HashMap<>();
+  private final double distance;
+  private final String prefix;
+  private final String onCooldown;
 
   public Commands(Footcube plugin, Manager manager, Configuration configuration) {
     this.plugin = plugin;
     this.manager = manager;
     this.configuration = configuration;
-    COOLDOWN = this.plugin.getConfig().getInt("cooldown");
+    this.distance = this.plugin.getConfig().getDouble("distance");
+    this.prefix = this.configuration.get().getString("PREFIX");
+    this.onCooldown = this.configuration.get().getString("ON_COOLDOWN");
+    COOLDOWN = this.plugin.getConfig().getInt("cooldown.commands");
   }
 
   @Override
@@ -80,10 +86,8 @@ public class Commands implements CommandExecutor, TabCompleter {
               }
             }.runTaskTimer(this.plugin, 20, 20);
           } else {
-            String prefix = this.configuration.get().getString("PREFIX");
-            String onCooldown = this.configuration.get().getString("ON_COOLDOWN").replace("%prefix%", prefix).replace("%timeleft%", String.valueOf(timeLeft));
-
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', onCooldown));
+            String message = this.onCooldown.replace("%prefix%", this.prefix).replace("%timeleft%", String.valueOf(timeLeft));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
           }
         } else this.sendMessage(player, "INSUFFICIENT_PERMISSION", "nfootcube.cube", 0);
         return true;
@@ -91,10 +95,9 @@ public class Commands implements CommandExecutor, TabCompleter {
 
       if (command.getName().equalsIgnoreCase("clearcube")) {
         if (player.hasPermission("nfootcube.clearcube")) {
-          final double distance = this.plugin.getConfig().getDouble("distance");
           if (!this.plugin.getController().cubes.isEmpty()) {
             for (Slime cube : this.plugin.getController().cubes) {
-              if (this.plugin.getController().getDistance(cube.getLocation(), player.getLocation()) < distance) {
+              if (this.plugin.getController().getDistance(cube.getLocation(), player.getLocation()) < this.distance) {
                 cube.setHealth(0.0D);
                 this.plugin.getController().cubes.remove(cube);
                 this.sendMessage(player, "CUBE_CLEARED", "", 0);
