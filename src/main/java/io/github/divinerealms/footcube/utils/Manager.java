@@ -1,51 +1,46 @@
 package io.github.divinerealms.footcube.utils;
 
 import io.github.divinerealms.footcube.Footcube;
-import org.bukkit.ChatColor;
-
-import java.util.ArrayList;
-import java.util.List;
+import io.github.divinerealms.footcube.listeners.Controller;
 
 public class Manager {
   private final Footcube plugin;
-  private final Configuration configuration;
+  private final Color color;
+  private final Controller controller;
+  private final Cooldown cooldown;
   private final Logger logger;
-  private final String prefix;
+  private final Message message;
 
-  public Manager(Footcube plugin) {
+  public Manager(Footcube plugin, Configuration configuration) {
     this.plugin = plugin;
-    this.configuration = new Configuration(this.plugin);
-    this.logger = new Logger(plugin, this);
-    this.prefix = this.configuration.get().getString("PREFIX");
+    this.color = new Color(this, configuration);
+    this.controller = new Controller(this);
+    this.cooldown = new Cooldown(this, configuration);
+    this.logger = new Logger(this, configuration);
+    this.message = new Message(this, configuration);
   }
 
-  public String color(String message) {
-    message = this.configuration.get().getString(message);
-    message = message
-        .replace("%prefix%", this.prefix)
-        .replace("%time%", String.valueOf(System.currentTimeMillis() - this.plugin.getTimeAtStart()));
-    return ChatColor.translateAlternateColorCodes('&', message);
+  public Footcube getPlugin() {
+    return this.plugin;
   }
 
-  public String color(String message, String permission) {
-    message = this.configuration.get().getString(message);
-    message = message
-        .replace("%prefix%", this.prefix)
-        .replace("%permission%", permission)
-        .replace("%time%", String.valueOf(System.currentTimeMillis() - this.plugin.getTimeAtStart()));
-    return ChatColor.translateAlternateColorCodes('&', message);
+  public Color getColor() {
+    return this.color;
   }
 
-  public List<String> color(List<String> list) {
-    List<String> colorized = new ArrayList<>();
+  public Controller getController() {
+    return this.controller;
+  }
 
-    for (String line : list)
-      colorized.add(ChatColor.translateAlternateColorCodes('&', line));
-
-    return colorized;
+  public Cooldown getCooldown() {
+    return this.cooldown;
   }
 
   public Logger getLogger() {
     return this.logger;
+  }
+
+  public Message getMessage() {
+    return this.message;
   }
 }

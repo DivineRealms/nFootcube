@@ -22,15 +22,12 @@ public class Configuration {
 
   public FileConfiguration get() {
     if (this.messages == null) this.reloadMessages();
-
     return messages;
   }
 
   public void reloadMessages() {
     if (this.file == null) file = new File(this.plugin.getDataFolder(), "messages.yml");
-
     messages = YamlConfiguration.loadConfiguration(this.file);
-
     InputStream defaultStream = this.plugin.getResource("messages.yml");
     if (defaultStream != null) {
       YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defaultStream));
@@ -40,7 +37,6 @@ public class Configuration {
 
   public void saveMessages() {
     if (this.messages == null || this.file == null) return;
-
     try {
       this.get().save(this.file);
     } catch (IOException exception) {
@@ -50,9 +46,6 @@ public class Configuration {
 
   public void saveDefaultMessages() {
     if (this.file == null) this.file = new File(this.plugin.getDataFolder(), "messages.yml");
-
-    if (!this.file.exists()) {
-      this.plugin.saveResource("messages.yml", false);
-    }
+    if (!this.file.exists()) this.plugin.saveResource("messages.yml", false);
   }
 }

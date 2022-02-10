@@ -1,6 +1,7 @@
 package io.github.divinerealms.footcube.listeners;
 
-import io.github.divinerealms.footcube.Footcube;
+import io.github.divinerealms.footcube.utils.Manager;
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -12,7 +13,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
@@ -25,48 +25,45 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 public class Controller implements Listener {
-  private final Footcube plugin;
-  public HashSet<Slime> cubes;
-  private final HashMap<UUID, Vector> velocities;
-  private final HashMap<UUID, Long> kicked;
-  private final HashMap<UUID, Double> speed;
-  private final HashMap<UUID, Double> charges;
   public final ArrayList<Player> immune;
   public final HashMap<Player, BukkitTask> immuneMap;
-  private final double maxPowerRegular;
-  private final double maxPowerCharged;
+  private final Manager manager;
+  private final HashMap<UUID, Vector> velocities;
+  private final HashMap<UUID, Long> kicked;
+  private final HashMap<UUID, Double> charges;
+  private final double regularKick;
+  private final double chargedKick;
   private final double kickPower;
-  private final boolean redBall;
+  private final boolean ballEffect;
+  private final boolean debugEnabled;
+  private final Sound soundControl;
+  private final Sound soundKick;
+  private final EntityEffect entityEffect;
+  private final PotionEffect potionEffect;
+  public HashSet<Slime> cubes;
 
-  public Controller(Footcube plugin) {
-    this.plugin = plugin;
+  public Controller(Manager manager) {
+    this.manager = manager;
     this.cubes = new HashSet<>();
     this.velocities = new HashMap<>();
     this.kicked = new HashMap<>();
-    this.speed = new HashMap<>();
     this.charges = new HashMap<>();
     this.immune = new ArrayList<>();
     this.immuneMap = new HashMap<>();
-    this.maxPowerRegular = this.plugin.getConfig().getDouble("maxPower.regular");
-    this.maxPowerCharged = this.plugin.getConfig().getDouble("maxPower.charged");
-    this.kickPower = this.plugin.getConfig().getDouble("kickPower");
-    this.redBall = this.plugin.getConfig().getBoolean("redBall");
+    this.regularKick = this.manager.getPlugin().getConfig().getDouble("Cube.Power_Limit.Regular_Kick");
+    this.chargedKick = this.manager.getPlugin().getConfig().getDouble("Cube.Power_Limit.Charged_Kick");
+    this.kickPower = this.manager.getPlugin().getConfig().getDouble("Cube.Kick_Power");
+    this.ballEffect = this.manager.getPlugin().getConfig().getBoolean("Cube.Effect.Enabled");
+    this.soundControl = Sound.valueOf(this.manager.getPlugin().getConfig().getString("Cube.Sounds.Move"));
+    this.soundKick = Sound.valueOf(this.manager.getPlugin().getConfig().getString("Cube.Sounds.Kick"));
+    this.entityEffect = EntityEffect.valueOf(this.manager.getPlugin().getConfig().getString("Cube.Effect.Effect"));
+    this.debugEnabled = this.manager.getPlugin().getConfig().getBoolean("Debug");
+    this.potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, -3, true);
     this.removeCubes();
   }
 
   @EventHandler
-  public void onMove(PlayerMoveEvent event) {
-    Location to = event.getTo();
-    Location from = event.getFrom();
-    double x = Math.abs(to.getX() - from.getX());
-    double y = Math.abs(to.getY() - from.getY()) / 2.0D;
-    double z = Math.abs(to.getZ() - from.getZ());
-    this.speed.put(event.getPlayer().getUniqueId(), Math.sqrt(x * x + y * y + z * z));
-  }
-
-  @EventHandler
   public void onQuit(PlayerQuitEvent event) {
-    this.speed.remove(event.getPlayer().getUniqueId());
     this.charges.remove(event.getPlayer().getUniqueId());
   }
 
@@ -75,31 +72,35 @@ public class Controller implements Listener {
     Entity[] entities;
     for (int length = (entities = event.getChunk().getEntities()).length, i = 0; i < length; ++i) {
       Entity entity = entities[i];
-      if (entity instanceof Slime && this.cubes.contains(entity)) {
-        this.cubes.remove((Slime) entity);
-        entity.remove();
-      }
+      if (!(entity instanceof Slime)) return;
+      if (!this.cubes.contains(entity)) return;
+
+      this.cubes.remove((Slime) entity);
+      entity.remove();
     }
   }
 
   @EventHandler(priority = EventPriority.HIGH)
   public void onDamage(EntityDamageEvent event) {
-    if (event.getEntity() instanceof Slime && this.cubes.contains((Slime) event.getEntity())) {
-      if (event.getCause() == EntityDamageEvent.DamageCause.FALL) event.setCancelled(true);
+    if (!(event.getEntity() instanceof Slime)) return;
+    if (!this.cubes.contains((Slime) event.getEntity())) return;
+    if (event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
 
-      event.setDamage(0.0);
-    }
+    event.setCancelled(true);
   }
 
   @EventHandler
   public void onRightClick(PlayerInteractEntityEvent event) {
-    if (event.getRightClicked() instanceof Slime && this.cubes.contains((Slime) event.getRightClicked()) && !this.kicked.containsKey(event.getPlayer().getUniqueId())) {
-      Slime cube = (Slime) event.getRightClicked();
-      cube.setVelocity(cube.getVelocity().add(new Vector(0.0D, 0.7D, 0.0D)));
-      cube.getWorld().playSound(cube.getLocation(), Sound.SLIME_WALK, 0.75F, 1.0F);
-      this.kicked.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
-      //TODO this.organization.ballTouch(event.getPlayer());
-    }
+    if (!(event.getRightClicked() instanceof Slime)) return;
+    if (!this.cubes.contains((Slime) event.getRightClicked())) return;
+    if (this.kicked.containsKey(event.getPlayer().getUniqueId())) return;
+    if (event.getPlayer().getGameMode() != GameMode.SURVIVAL) return;
+
+    Slime cube = (Slime) event.getRightClicked();
+    cube.setVelocity(cube.getVelocity().add(new Vector(0.0D, 0.5D, 0.0D)));
+    cube.getWorld().playSound(cube.getLocation(), this.soundControl, 0.75F, 1.0F);
+    this.kicked.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
+    //TODO this.organization.ballTouch(event.getPlayer());
   }
 
   @EventHandler
@@ -112,43 +113,75 @@ public class Controller implements Listener {
     }
   }
 
-  private Double format(Double value) {
+  private double format(Double value) {
     DecimalFormat decimalFormat = new DecimalFormat("#.##");
     value = Double.parseDouble(decimalFormat.format(value));
     return value;
   }
 
+  private double getSpeed(Player player) {
+    return player.getVelocity().length();
+  }
+
+  public double getDistance(Location start, Location end) {
+    return start.subtract(end).length();
+  }
+
   @EventHandler
   public void onSlamSlime(EntityDamageByEntityEvent event) {
-    if (event.getEntity() instanceof Slime && this.cubes.contains((Slime) event.getEntity()) && event.getDamager() instanceof Player && event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
-      Slime cube = (Slime) event.getEntity();
-      Player player = (Player) event.getDamager();
+    if (!(event.getEntity() instanceof Slime)) return;
+    if (!this.cubes.contains((Slime) event.getEntity())) return;
+    if (!(event.getDamager() instanceof Player)) return;
+    if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
 
-      double charge = 1.0D;
-      double power = 0.4D;
+    Slime cube = (Slime) event.getEntity();
+    Player player = (Player) event.getDamager();
 
-      Vector kick;
-
-      if (this.charges.containsKey(player.getUniqueId())) charge += this.charges.get(player.getUniqueId()) * 7.0D;
-      if (this.speed.containsKey(player.getUniqueId())) power += this.speed.get(player.getUniqueId()) * 2.0D + 0.4D;
-
-      if (charge > 1.0D) {
-        if (power >= this.maxPowerCharged && charge > 2.0D)
-          kick = player.getLocation().getDirection().normalize().multiply(this.maxPowerCharged * charge * this.kickPower).setY(0.3D);
-        else kick = player.getLocation().getDirection().normalize().multiply(power * charge * this.kickPower).setY(0.3D);
-      } else if (power >= this.maxPowerRegular && charge <= 2.0D)
-        kick = player.getLocation().getDirection().normalize().multiply(this.maxPowerRegular * charge * this.kickPower).setY(0.3D);
-      else kick = player.getLocation().getDirection().normalize().multiply(power * charge * this.kickPower).setY(0.3D);
-
-      String message = colorize("&6&l[&e&lDEBUG&6&l]&r &b" + player.getName() + "&7 (&fPower &a" + format(power) + "&7)" + "&7 (&fCharge &a" + format(charge) + "&7)" + "&7 (&fKick Power &a" + format(this.maxPowerCharged * charge * this.kickPower) + "&7)");
-      this.plugin.getServer().broadcastMessage(message);
-
-      //this.organization.ballTouch(player);
-
-      cube.setVelocity(cube.getVelocity().add(kick));
-      cube.getWorld().playSound(cube.getLocation(), Sound.SUCCESSFUL_HIT, 0.75F, 1.0F);
-      event.setCancelled(true);
+    if (player.getGameMode() != GameMode.SURVIVAL) {
+      if (!player.hasPermission("nfootcube.clearcube")) event.setCancelled(true);
+      else {
+        // TODO: disable removal in matches
+        this.cubes.remove(cube);
+        this.manager.getMessage().send(player, "CUBE_CLEARED");
+      }
+      return;
     }
+
+    double charge = 1.0D;
+    double power = 0.4D;
+
+    Vector kick;
+    String message = colorize("&6[&eDebug&6] %server_tps_1_colored% TPS &7: &b" + player.getName());
+
+    if (this.charges.containsKey(player.getUniqueId())) charge += this.charges.get(player.getUniqueId()) * 7.0D;
+    power += this.getSpeed(player) * 2.0D + 0.4D;
+
+    if (charge > 1.0D) {
+      if (power >= this.chargedKick && charge > 2.0D) {
+        kick = player.getLocation().getDirection().normalize().multiply(this.chargedKick * charge * this.kickPower).setY(0.3D);
+        message = message + colorize("&r with &a" + format(charge) + "&f charge and &c" + format(power) + " &fpower.");
+      } else {
+        kick = player.getLocation().getDirection().normalize().multiply(power * charge * this.kickPower).setY(0.3D);
+        message = message + colorize("&r with &a" + format(charge) + "&f charge and &a" + format(power) + " &fpower.");
+      }
+    } else if (power >= this.regularKick && charge <= 2.0D) {
+      kick = player.getLocation().getDirection().normalize().multiply(this.regularKick * charge * this.kickPower).setY(0.3D);
+      message = message + colorize("&r with &c" + format(power) + " &fpower.");
+    } else {
+      kick = player.getLocation().getDirection().normalize().multiply(power * charge * this.kickPower).setY(0.3D);
+      message = message + colorize("&r with &a" + format(power) + " &fpower.");
+    }
+
+    //this.organization.ballTouch(player);
+
+    cube.setVelocity(cube.getVelocity().add(kick));
+    cube.getWorld().playSound(cube.getLocation(), this.soundKick, 0.75F, 1.0F);
+
+    message = PlaceholderAPI.setPlaceholders(player, message);
+    if (this.debugEnabled) for (Player onlinePlayers : this.manager.getPlugin().getServer().getOnlinePlayers())
+      if (onlinePlayers.hasPermission("nfootcube.debug")) onlinePlayers.sendMessage(message);
+
+    event.setCancelled(true);
   }
 
   public void spawnCube(Location location) {
@@ -158,35 +191,16 @@ public class Controller implements Listener {
     this.cubes.add(cube);
   }
 
-  public double getDistance(Location locationA, Location locationB) {
-    locationA.add(0.0D, -1.0D, 0.0D);
-    double dx = Math.abs(locationA.getX() - locationB.getX());
-    double dy = Math.abs(locationA.getY() - locationB.getY() - 0.25D) - 1.25D;
-    if (dy < 0.0) dy = 0.0;
-    double dz = Math.abs(locationA.getZ() - locationB.getZ());
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
-  }
-
   public void update() {
     if (this.kicked.size() > 0)
       this.kicked.entrySet().removeIf(entry -> System.currentTimeMillis() > this.kicked.get(entry.getKey()) + 1000L);
 
-    Collection<? extends Player> onlinePlayers;
-    if (this.plugin.getServer().getOnlinePlayers().size() != 0) {
-      for (int length = (onlinePlayers = this.plugin.getServer().getOnlinePlayers()).size(), i = 0; i < length; ++i) {
-        Player player = (Player) onlinePlayers.toArray()[i];
-        player.setMaxHealth(20.0);
-        player.setHealth(20.0);
-        player.setSaturation(100.0F);
-        player.setExhaustion(20.0F);
-      }
-    }
+    Collection<? extends Player> onlinePlayers = this.manager.getPlugin().getServer().getOnlinePlayers();
 
     for (UUID uuid : this.charges.keySet()) {
-      Player player = this.plugin.getServer().getPlayer(uuid);
+      Player player = this.manager.getPlugin().getServer().getPlayer(uuid);
       double charge = this.charges.get(uuid);
-      //final double nextCharge = 1.0 - (1.0 - charge) * (0.95 - this.getStoreNumber(player, 5) * 0.005);
-      final double nextCharge = 1.0D - (1.0D - charge) * (0.95D - 0.0D * 0.005D);
+      final double nextCharge = 1.0D - (1.0D - charge) * 0.95D;
       this.charges.put(uuid, nextCharge);
       player.setExp((float) nextCharge);
     }
@@ -195,100 +209,91 @@ public class Controller implements Listener {
 
     while (cubesIterator.hasNext()) {
       Slime cube = cubesIterator.next();
-      //for (Slime cube : this.cubes) {
       UUID id = cube.getUniqueId();
       Vector oldV = cube.getVelocity();
       if (this.velocities.containsKey(id)) oldV = this.velocities.get(id);
+      if (cube.isDead()) cubesIterator.remove();
 
-      if (!cube.isDead()) {
-        boolean sound = false;
-        boolean kicked = false;
-        Vector newV = cube.getVelocity();
+      boolean sound = false;
+      boolean kicked = false;
+      Vector newV = cube.getVelocity();
 
-        for (int length2 = (onlinePlayers = this.plugin.getServer().getOnlinePlayers()).size(), j = 0; j < length2; ++j) {
-          Player player = (Player) onlinePlayers.toArray()[j];
-          if (!this.immune.contains(player) && player.getGameMode() != GameMode.SPECTATOR) {
-            double delta = this.getDistance(cube.getLocation(), player.getLocation());
-            if (delta < 1.2D) {
-              if (delta < 0.8D && newV.length() > 0.5D) newV.multiply(0.5D / newV.length());
-
-              if (this.speed.containsKey(player.getUniqueId())) {
-                double power = this.speed.get(player.getUniqueId()) / 3.0D + oldV.length() / 6.0D;
-                newV.add(player.getLocation().getDirection().setY(0).normalize().multiply(power));
-                //this.organization.ballTouch(p3);
-                kicked = true;
-                if (power > 0.15D) sound = true;
-              }
-            }
+      for (Player player : onlinePlayers) {
+        if (!this.immune.contains(player) && player.getGameMode() == GameMode.SURVIVAL) {
+          double delta = this.getDistance(cube.getLocation(), player.getLocation());
+          if (delta < 1.2D) {
+            if (delta < 0.8D && newV.length() > 0.5D) newV.multiply(0.5D / newV.length());
+            double speed = this.getSpeed(player);
+            double power = speed / 3.0D + oldV.length() / 6.0D;
+            newV.add(player.getLocation().getDirection().setY(0).normalize().multiply(power));
+            //this.organization.ballTouch(p3);
+            kicked = true;
+            if (power > 0.15D) sound = true;
           }
         }
+      }
 
-        if (newV.getX() == 0.0D) {
-          newV.setX(-oldV.getX() * 0.8D);
-          if (Math.abs(oldV.getX()) > 0.3D) sound = true;
-        } else if (!kicked && Math.abs(oldV.getX() - newV.getX()) < 0.1D) newV.setX(oldV.getX() * 0.98D);
+      if (newV.getX() == 0.0D) {
+        newV.setX(-oldV.getX() * 0.8D);
+        if (Math.abs(oldV.getX()) > 0.3D) sound = true;
+      } else if (!kicked && Math.abs(oldV.getX() - newV.getX()) < 0.1D) newV.setX(oldV.getX() * 0.98D);
 
-        if (newV.getZ() == 0.0D) {
-          newV.setZ(-oldV.getZ() * 0.8D);
-          if (Math.abs(oldV.getZ()) > 0.3D) sound = true;
-        } else if (!kicked && Math.abs(oldV.getZ() - newV.getZ()) < 0.1) newV.setZ(oldV.getZ() * 0.98D);
+      if (newV.getZ() == 0.0D) {
+        newV.setZ(-oldV.getZ() * 0.8D);
+        if (Math.abs(oldV.getZ()) > 0.3D) sound = true;
+      } else if (!kicked && Math.abs(oldV.getZ() - newV.getZ()) < 0.1) newV.setZ(oldV.getZ() * 0.98D);
 
-        if (newV.getY() < 0.0 && oldV.getY() < 0.0D && oldV.getY() < newV.getY() - 0.05D) {
-          newV.setY(-oldV.getY() * 0.8D);
-          if (Math.abs(oldV.getY()) > 0.3D) sound = true;
-        }
+      if (newV.getY() < 0.0 && oldV.getY() < 0.0D && oldV.getY() < newV.getY() - 0.05D) {
+        newV.setY(-oldV.getY() * 0.8D);
+        if (Math.abs(oldV.getY()) > 0.3D) sound = true;
+      }
 
-        if (sound) cube.getWorld().playSound(cube.getLocation(), Sound.SLIME_WALK, 0.5F, 1.0F);
+      if (sound) cube.getWorld().playSound(cube.getLocation(), this.soundControl, 0.5F, 1.0F);
 
-        Collection<? extends Player> onlinePlayers3;
-        for (int length3 = (onlinePlayers3 = this.plugin.getServer().getOnlinePlayers()).size(), k = 0; k < length3; ++k) {
-          Player p4 = (Player) onlinePlayers3.toArray()[k];
-          double delta2 = this.getDistance(cube.getLocation(), p4.getLocation());
-          if (delta2 < newV.length() * 1.3D) {
-            Vector loc = cube.getLocation().toVector();
-            Vector nextLoc = new Vector(loc.getX(), loc.getY(), loc.getZ()).add(newV);
-            boolean rightDirection = true;
-            Vector pDir = new Vector(p4.getLocation().getX() - loc.getX(), 0.0D, p4.getLocation().getZ() - loc.getZ());
+      for (Player player : onlinePlayers) {
+        double delta2 = this.getDistance(cube.getLocation(), player.getLocation());
+        if (delta2 < newV.length() * 1.3D) {
+          Vector loc = cube.getLocation().toVector();
+          Vector nextLoc = new Vector(loc.getX(), loc.getY(), loc.getZ()).add(newV);
+          boolean rightDirection = true;
+          Vector pDir = new Vector(player.getLocation().getX() - loc.getX(), 0.0D, player.getLocation().getZ() - loc.getZ());
 
-            Vector cDir = new Vector(newV.getX(), 0.0D, newV.getZ()).normalize();
-            int px = 1;
-            if (pDir.getX() < 0.0D) px = -1;
-            int pz = 1;
-            if (pDir.getZ() < 0.0D) pz = -1;
-            int cx = 1;
-            if (cDir.getX() < 0.0D) cx = -1;
-            int cz = 1;
-            if (cDir.getZ() < 0.0D) cz = -1;
-            if ((px != cx && pz != cz) || ((px != cx || pz != cz) && (cx * pDir.getX() <= cx * cz * px * cDir.getZ() || cz * pDir.getZ() <= cz * cx * pz * cDir.getX())))
-              rightDirection = false;
-            if (rightDirection && loc.getY() < p4.getLocation().getY() + 2.0D && loc.getY() > p4.getLocation().getY() - 1.0D && nextLoc.getY() < p4.getLocation().getY() + 2.0D && nextLoc.getY() > p4.getLocation().getY() - 1.0D) {
-              double a = newV.getZ() / newV.getX();
-              double b = loc.getZ() - a * loc.getX();
-              double c = p4.getLocation().getX();
-              double d = p4.getLocation().getZ();
-              double D = Math.abs(a * c - d + b) / Math.sqrt(a * a + 1.0D);
-              if (D < 0.8D) newV.multiply(delta2 / newV.length());
-            }
+          Vector cDir = new Vector(newV.getX(), 0.0D, newV.getZ()).normalize();
+          int px = 1;
+          if (pDir.getX() < 0.0D) px = -1;
+          int pz = 1;
+          if (pDir.getZ() < 0.0D) pz = -1;
+          int cx = 1;
+          if (cDir.getX() < 0.0D) cx = -1;
+          int cz = 1;
+          if (cDir.getZ() < 0.0D) cz = -1;
+          if ((px != cx && pz != cz) || ((px != cx || pz != cz) && (cx * pDir.getX() <= cx * cz * px * cDir.getZ() || cz * pDir.getZ() <= cz * cx * pz * cDir.getX())))
+            rightDirection = false;
+          if (rightDirection && loc.getY() < player.getLocation().getY() + 2.0D && loc.getY() > player.getLocation().getY() - 1.0D && nextLoc.getY() < player.getLocation().getY() + 2.0D && nextLoc.getY() > player.getLocation().getY() - 1.0D) {
+            double a = newV.getZ() / newV.getX();
+            double b = loc.getZ() - a * loc.getX();
+            double c = player.getLocation().getX();
+            double d = player.getLocation().getZ();
+            double D = Math.abs(a * c - d + b) / Math.sqrt(a * a + 1.0D);
+            if (D < 0.8D) newV.multiply(delta2 / newV.length());
           }
         }
+      }
 
-        cube.setMaxHealth(1.0D);
-        cube.setHealth(1.0D);
-        cube.setVelocity(newV);
-        cube.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 10, -3, true), true);
+      cube.setVelocity(newV);
+      cube.addPotionEffect(this.potionEffect);
 
-        if (this.redBall) cube.playEffect(EntityEffect.HURT);
+      if (this.ballEffect) cube.playEffect(this.entityEffect);
 
-        this.velocities.put(id, newV);
-      } else cubesIterator.remove();
+      this.velocities.put(id, newV);
     }
   }
 
   public void removeCubes() {
-    List<Entity> entities = this.plugin.getServer().getWorlds().get(0).getEntities();
+    List<Entity> entities = this.manager.getPlugin().getServer().getWorlds().get(0).getEntities();
 
     for (Entity entity : entities)
-      if (entity instanceof Slime && this.cubes.contains((Slime) entity)) entity.remove();
+      if (entity instanceof Slime) entity.remove();
   }
 
   private String colorize(String message) {

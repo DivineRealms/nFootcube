@@ -12,6 +12,6 @@ HELP:
   - '&r &r'
   - '&6 /&enfc help&7: &fPrikazuje ovu stranicu.'
   - '&6 /&enfc reload&7: &fOsvežavanje plugina.'
-  - '&6 /&ecube&7: &fStvaranje lopte.'
-  - '&6 /&eclearcube&7: &fBrisanje lopte u radiusu.'
+  - '&6 /&enfc cube&7: &fStvaranje lopte.'
+  - '&6 /&enfc clearcube&7: &fBrisanje lopte u radiusu.'
   - '&8&m-----------------------------------------------------&r'

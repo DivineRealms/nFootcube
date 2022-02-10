@@ -1,9 +1,68 @@
-distance: 100
-cooldown:
-  commands: 15
-  kick: 0.25
-maxPower:
-  regular: 2.0
-  charged: 1.0
-kickPower: 1.0
-redBall: false
+# =================================================================================================
+#
+#      __      ooooooooooo                       o8                        oooo
+#   .'".'"'.    888    88 ooooooo     ooooooo  o888oo ooooooo  oooo  oooo   888ooooo    ooooooooo
+#  :._.""._.:   888     888     888 888     888 888 888         888   888   888    888 888     888
+#  :  \__/  :   888ooo8 888     888 888     888 888 888         888   888   888    888 888oooooo88
+#   './  \.'    888     888     888 888     888 888 888         888   888   888    888 888
+#      ""      o888o      88ooo88     88ooo88    888o 88ooo888   888o88 8o o888ooo88     88oooo888
+#
+# =================================================================================================
+
+# -------------------------------------------------------------------------------------------------
+# Settings for the ball (cube).
+# -------------------------------------------------------------------------------------------------
+Cube:
+
+  # Control the power limit.
+  # Changing these values results in balls being able to travel further away from a single hit.
+  Power_Limit:
+
+    # Kicking power when not using shift or charging for less than 4 dots (XP Bar).
+    # Default value: 2.0
+    Regular_Kick: 2.0
+
+    # Kick Power whilst shifting.
+    # Default value: 1.0
+    Charged_Kick: 1.0
+
+  # Control the kick power.
+  # Changing this value increases the strenght of the kick.
+  #
+  # Default value: 1.0
+  Kick_Power: 1.0
+
+  # Settings for entity effect.
+  # This setting can be toggled and will only work after a server restart.
+  Effect:
+    Enabled: false
+
+    # List of effects: DEATH, FIREWORK_EXPLODE, HURT, IRON_GOLEM_ROSE, SHEEP_EAT, VILLAGER_ANGRY
+    # VILLAGER_HAPPY, VILLAGER_HEART, WITCH_MAGIC, WOLF_HEARTS, WOLF_SHAKE, WOLF_SMOKE,
+    # ZOMBIE_TRANSFORM.
+    Effect: HURT
+
+  # Choose your own sound for when a player interacts with a ball.
+  # This setting can be toggled and will only work after a server restart.
+  #
+  # List of available sounds: https://www.andre601.ch/Spigot-Sounds/sounds/mc-1.8/
+  Sounds:
+    Enabled: true
+
+    # Sound when moving the ball with the body and/or right clicking it.
+    Move: SLIME_WALK
+
+    # Sound when kicking the ball.
+    Kick: SUCCESSFUL_HIT
+
+  # The radius that is used to remove balls using the "clearcube" command.
+  Remove_Distance: 100
+
+  # How long should players wait between each ball spawn?
+  Spawn_Cooldown: 15
+
+# -------------------------------------------------------------------------------------------------
+# Toggle debug for more informations.
+# Debug currently only shows ball hits.
+# -------------------------------------------------------------------------------------------------
+Debug: false
