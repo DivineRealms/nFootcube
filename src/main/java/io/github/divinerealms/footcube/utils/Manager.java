@@ -11,7 +11,7 @@ public class Manager {
   private final Logger logger;
   private final Message message;
 
-  public Manager(Footcube plugin, Configuration configuration) {
+  public Manager(final Footcube plugin, final Configuration configuration) {
     this.plugin = plugin;
     this.color = new Color(this, configuration);
     this.controller = new Controller(this);

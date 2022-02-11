@@ -21,7 +21,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
   private final double distance;
   private final String prefix;
 
-  public BaseCommand(Manager manager, Configuration configuration) {
+  public BaseCommand(final Manager manager, final Configuration configuration) {
     this.manager = manager;
     this.distance = this.manager.getPlugin().getConfig().getDouble("Cube.Remove_Distance");
     this.prefix = configuration.get().getString("PREFIX");
@@ -30,7 +30,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     if (sender instanceof Player) {
-      Player player = (Player) sender;
+      final Player player = (Player) sender;
 
       if (command.getName().equalsIgnoreCase("nfootcube")) {
         if (args.length == 0) {

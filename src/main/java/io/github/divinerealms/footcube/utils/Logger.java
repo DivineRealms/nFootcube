@@ -12,7 +12,7 @@ public class Logger {
   private final Configuration configuration;
   private final List<String> logo = new ArrayList<>();
 
-  public Logger(Manager manager, Configuration configuration) {
+  public Logger(final Manager manager, final Configuration configuration) {
     this.manager = manager;
     this.configuration = configuration;
   }
@@ -39,8 +39,8 @@ public class Logger {
   }
 
   public void setLogo() {
-    List<String> authors = this.manager.getPlugin().getDescription().getAuthors();
-    String formattedAuthors = authors.stream().map(String::valueOf).collect(Collectors.joining(", "));
+    final List<String> authors = this.manager.getPlugin().getDescription().getAuthors();
+    final String formattedAuthors = authors.stream().map(String::valueOf).collect(Collectors.joining(", "));
 
     this.logo.add("&9     __");
     this.logo.add("&3  .&9'&f\".'\"&9'&3.   &2" + this.manager.getPlugin().getName() + " &bv" + this.manager.getPlugin().getDescription().getVersion());

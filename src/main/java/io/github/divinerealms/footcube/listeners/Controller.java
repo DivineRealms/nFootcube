@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
@@ -30,6 +31,7 @@ public class Controller implements Listener {
   private final HashMap<UUID, Vector> velocities;
   private final HashMap<UUID, Long> kicked;
   private final HashMap<UUID, Double> charges;
+  private final Map<UUID, Deque<Location>> lastLocations;
   private final double regularKick;
   private final double chargedKick;
   private final double maxCharge;
@@ -41,15 +43,14 @@ public class Controller implements Listener {
   private final EntityEffect entityEffect;
   private final PotionEffect potionEffect;
   public HashSet<Slime> cubes;
-  private double finalSpeed = 0.0;
-  private double finalLocation = 0.0;
 
-  public Controller(Manager manager) {
+  public Controller(final Manager manager) {
     this.manager = manager;
     this.cubes = new HashSet<>();
     this.velocities = new HashMap<>();
     this.kicked = new HashMap<>();
     this.charges = new HashMap<>();
+    this.lastLocations = new HashMap<>();
     this.immune = new ArrayList<>();
     this.immuneMap = new HashMap<>();
     this.regularKick = this.manager.getPlugin().getConfig().getDouble("Cube.Power_Limit.Regular_Kick");
@@ -66,15 +67,16 @@ public class Controller implements Listener {
   }
 
   @EventHandler
-  public void onQuit(PlayerQuitEvent event) {
+  public void onQuit(final PlayerQuitEvent event) {
+    this.lastLocations.remove(event.getPlayer().getUniqueId());
     this.charges.remove(event.getPlayer().getUniqueId());
   }
 
   @EventHandler
-  public void onUnloadChunk(ChunkUnloadEvent event) {
-    Entity[] entities;
+  public void onUnloadChunk(final ChunkUnloadEvent event) {
+    final Entity[] entities;
     for (int length = (entities = event.getChunk().getEntities()).length, i = 0; i < length; ++i) {
-      Entity entity = entities[i];
+      final Entity entity = entities[i];
       if (!(entity instanceof Slime)) return;
       if (!this.cubes.contains(entity)) return;
 
@@ -84,7 +86,7 @@ public class Controller implements Listener {
   }
 
   @EventHandler(priority = EventPriority.HIGH)
-  public void onDamage(EntityDamageEvent event) {
+  public void onDamage(final EntityDamageEvent event) {
     if (!(event.getEntity() instanceof Slime)) return;
     if (!this.cubes.contains((Slime) event.getEntity())) return;
     if (event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
@@ -93,13 +95,13 @@ public class Controller implements Listener {
   }
 
   @EventHandler
-  public void onRightClick(PlayerInteractEntityEvent event) {
+  public void onRightClick(final PlayerInteractEntityEvent event) {
     if (!(event.getRightClicked() instanceof Slime)) return;
     if (!this.cubes.contains((Slime) event.getRightClicked())) return;
     if (this.kicked.containsKey(event.getPlayer().getUniqueId())) return;
     if (event.getPlayer().getGameMode() != GameMode.SURVIVAL) return;
 
-    Slime cube = (Slime) event.getRightClicked();
+    final Slime cube = (Slime) event.getRightClicked();
     cube.setVelocity(cube.getVelocity().add(new Vector(0.0D, 0.7D, 0.0D)));
     cube.getWorld().playSound(cube.getLocation(), this.soundControl, 0.75F, 1.0F);
     this.kicked.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
@@ -107,9 +109,9 @@ public class Controller implements Listener {
   }
 
   @EventHandler
-  public void onSneak(PlayerToggleSneakEvent event) {
-    Player player = event.getPlayer();
-    if (event.isSneaking()) this.charges.put(player.getUniqueId(), 0.0D);
+  public void onSneak(final PlayerToggleSneakEvent event) {
+    final Player player = event.getPlayer();
+    if (event.isSneaking()) this.charges.put(player.getUniqueId(), 0.0);
     else {
       player.setExp(0.0F);
       this.charges.remove(player.getUniqueId());
@@ -121,30 +123,43 @@ public class Controller implements Listener {
     return formattedValue / 100;
   }
 
-  private double getSpeed(Player player) {
-    Bukkit.getScheduler().runTaskAsynchronously(this.manager.getPlugin(), () -> this.finalSpeed = player.getVelocity().setY(player.getVelocity().getY() / 2.0).length());
-    return this.finalSpeed;
+  @EventHandler
+  public void onMove(final PlayerMoveEvent event) {
+    final UUID playerID = event.getPlayer().getUniqueId();
+    final Deque<Location> locations = this.lastLocations.computeIfAbsent(playerID, key -> new ArrayDeque<>());
+    if (locations.size() == 2) locations.poll();
+    locations.add(event.getTo());
   }
 
-  public double getDistance(Location start, Location end) {
-    Bukkit.getScheduler().runTaskAsynchronously(this.manager.getPlugin(), () -> {
-      start.setY(-0.25);
-      start.subtract(end).setY(-1.25);
-      if (start.getY() < 0.0) start.setY(0.0);
-      this.finalLocation = start.length();
-    });
-    return this.finalLocation;
+  public Vector getLastMoveVector(final UUID playerID) {
+    final Deque<Location> locations = this.lastLocations.get(playerID);
+    if (locations == null) return null;
+    final Location last = locations.poll();
+    final Location secondLast = locations.poll();
+    //noinspection ConstantConditions
+    final Vector vector = last.toVector().subtract(secondLast.toVector());
+    vector.setY(vector.getY() / 2.0);
+    locations.add(last);
+    locations.add(secondLast);
+    return vector;
+  }
+
+  public double getDistance(final Location start, final Location end) {
+    start.setY(-0.25);
+    start.subtract(end).setY(-1.25);
+    if (start.getY() < 0.0) start.setY(0.0);
+    return start.length();
   }
 
   @EventHandler
-  public void onSlamSlime(EntityDamageByEntityEvent event) {
+  public void onSlamSlime(final EntityDamageByEntityEvent event) {
     if (!(event.getEntity() instanceof Slime)) return;
     if (!this.cubes.contains((Slime) event.getEntity())) return;
     if (!(event.getDamager() instanceof Player)) return;
     if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
 
-    Slime cube = (Slime) event.getEntity();
-    Player player = (Player) event.getDamager();
+    final Slime cube = (Slime) event.getEntity();
+    final Player player = (Player) event.getDamager();
 
     if (player.getGameMode() != GameMode.SURVIVAL) {
       if (!player.hasPermission("nfootcube.clearcube")) event.setCancelled(true);
@@ -159,70 +174,65 @@ public class Controller implements Listener {
     double charge = 1.0D;
     double power = 0.4D;
     double total;
-
     Vector kick;
-    String message = colorize("&6[&eDebug&6] %server_tps_1_colored% TPS &7: &b" + player.getName());
+    String message = "&6[&eDebug&6] %server_tps_1_colored% TPS &7: &b" + player.getName();
 
     if (this.charges.containsKey(player.getUniqueId())) charge += this.charges.get(player.getUniqueId()) * 7.0D;
-    power += this.getSpeed(player) * 2.0D + 0.4D;
+    power += this.getLastMoveVector(player.getUniqueId()).length() * 2.0D + 0.4D;
 
     if (this.manager.getCooldown().isCubeKickCooldownEnabled()) {
-      long timeLeft = this.manager.getCooldown().getTimeleftMillis(player.getUniqueId(), this.manager.getCooldown().getCubeKickCooldown());
+      final long timeLeft = this.manager.getCooldown().getTimeleftMillis(player.getUniqueId(), this.manager.getCooldown().getCubeKickCooldown());
       if (timeLeft > 0.0) {
-        message = message + colorize("&c is on cooldown (" + (double) timeLeft / 1000.0 + "s)");
-        message = PlaceholderAPI.setPlaceholders(player, message);
-        if (this.debugEnabled) for (Player onlinePlayers : this.manager.getPlugin().getServer().getOnlinePlayers())
-          if (onlinePlayers.hasPermission("nfootcube.debug")) onlinePlayers.sendMessage(message);
         event.setCancelled(true);
         return;
       }
     }
 
+    // TODO: Simplify and cleanup
     if (charge > 1.0D && charge <= 4.0) {
       if (power >= this.chargedKick && charge > 2.0D) {
         total = this.chargedKick * charge * this.kickPower;
         kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
-        message = message + colorize("&r with &a" + format(charge) + "&f charge and &c" + format(power) + " &fpower &7[" + format(total) + " total kp]");
+        message = message + "&r with &a" + format(charge) + "&f charge and &c" + format(power) + " &fpower &7[" + format(total) + " total kp]";
       } else {
         total = power * charge * this.kickPower;
         kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
-        message = message + colorize("&r with &a" + format(charge) + "&f charge and &a" + format(power) + " &fpower &7[" + format(total) + " total kp]");
+        message = message + "&r with &a" + format(charge) + "&f charge and &a" + format(power) + " &fpower &7[" + format(total) + " total kp]";
       }
     } else if (charge > this.maxCharge) {
       if (power >= this.chargedKick) {
         total = this.chargedKick * this.maxCharge * this.kickPower;
         kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
-        message = message + colorize("&r with &c" + format(charge) + "&f charge and &c" + format(power) + " &fpower &7[" + format(total) + " total kp]");
+        message = message + "&r with &c" + format(charge) + "&f charge and &c" + format(power) + " &fpower &7[" + format(total) + " total kp]";
       } else {
         total = power * this.maxCharge * this.kickPower;
         kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
-        message = message + colorize("&r with &c" + format(charge) + "&f charge and &a" + format(power) + " &fpower &7[" + format(total) + " total kp]");
+        message = message + "&r with &c" + format(charge) + "&f charge and &a" + format(power) + " &fpower &7[" + format(total) + " total kp]";
       }
     } else if (power >= this.regularKick && charge <= 2.0D) {
       total = this.regularKick * charge * this.kickPower;
       kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
-      message = message + colorize("&r with &c" + format(power) + " &fpower &7[" + format(total) + " total kp]");
+      message = message + "&r with &c" + format(power) + " &fpower &7[" + format(total) + " total kp]";
     } else {
       total = power * charge * this.kickPower;
       kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
-      message = message + colorize("&r with &a" + format(power) + " &fpower");
+      message = message + "&r with &a" + format(power) + " &fpower";
     }
 
-    //this.organization.ballTouch(player);
+    //TODO: this.organization.ballTouch(player);
 
     cube.setVelocity(cube.getVelocity().add(kick));
     cube.getWorld().playSound(cube.getLocation(), this.soundKick, 0.75F, 1.0F);
 
     this.manager.getCooldown().setCooldown(player.getUniqueId(), System.currentTimeMillis());
     message = PlaceholderAPI.setPlaceholders(player, message);
-    if (this.debugEnabled) for (Player onlinePlayers : this.manager.getPlugin().getServer().getOnlinePlayers())
-      if (onlinePlayers.hasPermission("nfootcube.debug")) onlinePlayers.sendMessage(message);
+    if (this.debugEnabled) Bukkit.broadcast(ChatColor.translateAlternateColorCodes('&', message), "nfootcube.debug");
 
     event.setCancelled(true);
   }
 
-  public void spawnCube(Location location) {
-    Slime cube = (Slime) location.getWorld().spawnEntity(location, EntityType.SLIME);
+  public void spawnCube(final Location location) {
+    final Slime cube = (Slime) location.getWorld().spawnEntity(location, EntityType.SLIME);
     cube.setRemoveWhenFarAway(false);
     cube.setSize(1);
     this.cubes.add(cube);
@@ -232,38 +242,37 @@ public class Controller implements Listener {
     if (this.kicked.size() > 0)
       this.kicked.entrySet().removeIf(entry -> System.currentTimeMillis() > this.kicked.get(entry.getKey()) + 1000L);
 
-    Collection<? extends Player> onlinePlayers = this.manager.getPlugin().getServer().getOnlinePlayers();
+    final Collection<? extends Player> onlinePlayers = this.manager.getPlugin().getServer().getOnlinePlayers();
 
     for (UUID uuid : this.charges.keySet()) {
-      Player player = this.manager.getPlugin().getServer().getPlayer(uuid);
-      double charge = this.charges.get(uuid);
+      final Player player = this.manager.getPlugin().getServer().getPlayer(uuid);
+      final double charge = this.charges.get(uuid);
       final double nextCharge = 1.0D - (1.0D - charge) * 0.95D;
       this.charges.put(uuid, nextCharge);
       player.setExp((float) nextCharge);
     }
 
-    Iterator<Slime> cubesIterator = this.cubes.iterator();
+    final Iterator<Slime> cubesIterator = this.cubes.iterator();
 
     while (cubesIterator.hasNext()) {
-      Slime cube = cubesIterator.next();
-      UUID id = cube.getUniqueId();
+      final Slime cube = cubesIterator.next();
+      final UUID id = cube.getUniqueId();
       Vector oldV = cube.getVelocity();
       if (this.velocities.containsKey(id)) oldV = this.velocities.get(id);
       if (cube.isDead()) cubesIterator.remove();
 
       boolean sound = false;
       boolean kicked = false;
-      Vector newV = cube.getVelocity();
+      final Vector newV = cube.getVelocity();
 
-      for (Player player : onlinePlayers) {
+      for (final Player player : onlinePlayers) {
         if (!this.immune.contains(player) && player.getGameMode() == GameMode.SURVIVAL) {
-          double delta = this.getDistance(cube.getLocation(), player.getLocation());
+          final double delta = this.getDistance(cube.getLocation(), player.getLocation());
           if (delta < 1.2D) {
             if (delta < 0.8D && newV.length() > 0.5D) newV.multiply(0.5D / newV.length());
-            double speed = this.getSpeed(player);
-            double power = speed / 3.0D + oldV.length() / 6.0D;
+            final double power = this.getLastMoveVector(player.getUniqueId()).length() / 3.0D + oldV.length() / 6.0D;
             newV.add(player.getLocation().getDirection().setY(0).normalize().multiply(power));
-            //this.organization.ballTouch(p3);
+            //TODO: this.organization.ballTouch(p3);
             kicked = true;
             if (power > 0.15D) sound = true;
           }
@@ -287,15 +296,15 @@ public class Controller implements Listener {
 
       if (sound) cube.getWorld().playSound(cube.getLocation(), this.soundControl, 0.5F, 1.0F);
 
-      for (Player player : onlinePlayers) {
+      for (final Player player : onlinePlayers) {
         double delta2 = this.getDistance(cube.getLocation(), player.getLocation());
         if (delta2 < newV.length() * 1.3D) {
-          Vector loc = cube.getLocation().toVector();
-          Vector nextLoc = new Vector(loc.getX(), loc.getY(), loc.getZ()).add(newV);
+          final Vector loc = cube.getLocation().toVector();
+          final Vector nextLoc = new Vector(loc.getX(), loc.getY(), loc.getZ()).add(newV);
           boolean rightDirection = true;
-          Vector pDir = new Vector(player.getLocation().getX() - loc.getX(), 0.0D, player.getLocation().getZ() - loc.getZ());
+          final Vector pDir = new Vector(player.getLocation().getX() - loc.getX(), 0.0D, player.getLocation().getZ() - loc.getZ());
 
-          Vector cDir = new Vector(newV.getX(), 0.0D, newV.getZ()).normalize();
+          final Vector cDir = new Vector(newV.getX(), 0.0D, newV.getZ()).normalize();
           int px = 1;
           if (pDir.getX() < 0.0D) px = -1;
           int pz = 1;
@@ -311,7 +320,7 @@ public class Controller implements Listener {
             double b = loc.getZ() - a * loc.getX();
             double c = player.getLocation().getX();
             double d = player.getLocation().getZ();
-            double D = Math.abs(a * c - d + b) / Math.sqrt(a * a + 1.0D);
+            final double D = Math.abs(a * c - d + b) / Math.sqrt(a * a + 1.0D);
             if (D < 0.8D) newV.multiply(delta2 / newV.length());
           }
         }
@@ -327,13 +336,7 @@ public class Controller implements Listener {
   }
 
   public void removeCubes() {
-    List<Entity> entities = this.manager.getPlugin().getServer().getWorlds().get(0).getEntities();
-
-    for (Entity entity : entities)
-      if (entity instanceof Slime) entity.remove();
-  }
-
-  private String colorize(String message) {
-    return ChatColor.translateAlternateColorCodes('&', message);
+    final List<Entity> entities = this.manager.getPlugin().getServer().getWorlds().get(0).getEntities();
+    for (final Entity entity : entities) if (entity instanceof Slime) entity.remove();
   }
 }

@@ -10,7 +10,7 @@ public class Cooldown {
   private final String onCooldown;
   private final boolean isCubeKickCooldownEnabled;
 
-  public Cooldown(Manager manager, Configuration configuration) {
+  public Cooldown(final Manager manager, final Configuration configuration) {
     CUBE_SPAWN_COOLDOWN = manager.getPlugin().getConfig().getInt("Cube.Spawn_Cooldown");
     CUBE_KICK_COOLDOWN = manager.getPlugin().getConfig().getInt("Cube.Kick_Cooldown.Cooldown");
     this.cooldowns = new HashMap<>();

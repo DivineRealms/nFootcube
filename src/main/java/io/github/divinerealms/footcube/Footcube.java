@@ -34,7 +34,7 @@ public class Footcube extends JavaPlugin {
     this.configuration.reloadMessages();
     this.configuration.get().options().copyDefaults(true);
 
-    BaseCommand commands = new BaseCommand(this.manager, this.configuration);
+    final BaseCommand commands = new BaseCommand(this.manager, this.configuration);
     this.getCommand("nfootcube").setExecutor(commands);
     this.getCommand("nfootcube").setTabCompleter(commands);
   }

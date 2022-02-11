@@ -34,7 +34,7 @@ public class Color {
   }
 
   public List<String> color(List<String> list) {
-    List<String> colorized = new ArrayList<>();
+    final List<String> colorized = new ArrayList<>();
 
     for (String line : list)
       colorized.add(ChatColor.translateAlternateColorCodes('&', line));

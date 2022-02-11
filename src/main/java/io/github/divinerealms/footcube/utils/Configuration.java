@@ -15,7 +15,7 @@ public class Configuration {
   private FileConfiguration messages;
   private File file;
 
-  public Configuration(Footcube plugin) {
+  public Configuration(final Footcube plugin) {
     this.plugin = plugin;
     this.saveDefaultMessages();
   }
