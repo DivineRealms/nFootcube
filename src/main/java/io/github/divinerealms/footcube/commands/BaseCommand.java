@@ -47,7 +47,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
             break;
           case "cube":
             if (player.hasPermission("nfootcube.cube")) {
-              long timeLeft = this.manager.getCooldown().getTimeleft(player.getUniqueId());
+              long timeLeft = this.manager.getCooldown().getTimeleft(player.getUniqueId(), this.manager.getCooldown().getCubeSpawnCooldown());
               if (timeLeft <= 0) {
                 Location loc = player.getLocation().add(0.0, 1.0, 0.0);
 

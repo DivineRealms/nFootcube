@@ -21,7 +21,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
 public class Controller implements Listener {
@@ -33,6 +32,7 @@ public class Controller implements Listener {
   private final HashMap<UUID, Double> charges;
   private final double regularKick;
   private final double chargedKick;
+  private final double maxCharge;
   private final double kickPower;
   private final boolean ballEffect;
   private final boolean debugEnabled;
@@ -52,6 +52,7 @@ public class Controller implements Listener {
     this.immuneMap = new HashMap<>();
     this.regularKick = this.manager.getPlugin().getConfig().getDouble("Cube.Power_Limit.Regular_Kick");
     this.chargedKick = this.manager.getPlugin().getConfig().getDouble("Cube.Power_Limit.Charged_Kick");
+    this.maxCharge = this.manager.getPlugin().getConfig().getDouble("Cube.Power_Limit.Total_Kick_Power");
     this.kickPower = this.manager.getPlugin().getConfig().getDouble("Cube.Kick_Power");
     this.ballEffect = this.manager.getPlugin().getConfig().getBoolean("Cube.Effect.Enabled");
     this.soundControl = Sound.valueOf(this.manager.getPlugin().getConfig().getString("Cube.Sounds.Move"));
@@ -97,7 +98,7 @@ public class Controller implements Listener {
     if (event.getPlayer().getGameMode() != GameMode.SURVIVAL) return;
 
     Slime cube = (Slime) event.getRightClicked();
-    cube.setVelocity(cube.getVelocity().add(new Vector(0.0D, 0.5D, 0.0D)));
+    cube.setVelocity(cube.getVelocity().add(new Vector(0.0D, 0.7D, 0.0D)));
     cube.getWorld().playSound(cube.getLocation(), this.soundControl, 0.75F, 1.0F);
     this.kicked.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
     //TODO this.organization.ballTouch(event.getPlayer());
@@ -114,17 +115,19 @@ public class Controller implements Listener {
   }
 
   private double format(Double value) {
-    DecimalFormat decimalFormat = new DecimalFormat("#.##");
-    value = Double.parseDouble(decimalFormat.format(value));
-    return value;
+    double formattedValue = (int) ((value * 100) + 0.5);
+    return formattedValue / 100;
   }
 
   private double getSpeed(Player player) {
-    return player.getVelocity().length();
+    return player.getVelocity().setY(player.getVelocity().getY() / 2.0).length();
   }
 
   public double getDistance(Location start, Location end) {
-    return start.subtract(end).length();
+    start.setY(-0.25);
+    start.subtract(end).setY(-1.25);
+    if (start.getY() < 0.0) start.setY(0.0);
+    return start.length();
   }
 
   @EventHandler
@@ -149,6 +152,7 @@ public class Controller implements Listener {
 
     double charge = 1.0D;
     double power = 0.4D;
+    double total;
 
     Vector kick;
     String message = colorize("&6[&eDebug&6] %server_tps_1_colored% TPS &7: &b" + player.getName());
@@ -156,20 +160,46 @@ public class Controller implements Listener {
     if (this.charges.containsKey(player.getUniqueId())) charge += this.charges.get(player.getUniqueId()) * 7.0D;
     power += this.getSpeed(player) * 2.0D + 0.4D;
 
-    if (charge > 1.0D) {
+    if (this.manager.getCooldown().isCubeKickCooldownEnabled()) {
+      long timeLeft = this.manager.getCooldown().getTimeleftMillis(player.getUniqueId(), this.manager.getCooldown().getCubeKickCooldown());
+      if (timeLeft > 0.0) {
+        message = message + colorize("&c is on cooldown (" + (double) timeLeft / 1000.0 + "s)");
+        message = PlaceholderAPI.setPlaceholders(player, message);
+        if (this.debugEnabled) for (Player onlinePlayers : this.manager.getPlugin().getServer().getOnlinePlayers())
+          if (onlinePlayers.hasPermission("nfootcube.debug")) onlinePlayers.sendMessage(message);
+        event.setCancelled(true);
+        return;
+      }
+    }
+
+    if (charge > 1.0D && charge <= 4.0) {
       if (power >= this.chargedKick && charge > 2.0D) {
-        kick = player.getLocation().getDirection().normalize().multiply(this.chargedKick * charge * this.kickPower).setY(0.3D);
-        message = message + colorize("&r with &a" + format(charge) + "&f charge and &c" + format(power) + " &fpower.");
+        total = this.chargedKick * charge * this.kickPower;
+        kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
+        message = message + colorize("&r with &a" + format(charge) + "&f charge and &c" + format(power) + " &fpower &7[" + format(total) + " total kp]");
       } else {
-        kick = player.getLocation().getDirection().normalize().multiply(power * charge * this.kickPower).setY(0.3D);
-        message = message + colorize("&r with &a" + format(charge) + "&f charge and &a" + format(power) + " &fpower.");
+        total = power * charge * this.kickPower;
+        kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
+        message = message + colorize("&r with &a" + format(charge) + "&f charge and &a" + format(power) + " &fpower &7[" + format(total) + " total kp]");
+      }
+    } else if (charge > this.maxCharge) {
+      if (power >= this.chargedKick) {
+        total = this.chargedKick * this.maxCharge * this.kickPower;
+        kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
+        message = message + colorize("&r with &c" + format(charge) + "&f charge and &c" + format(power) + " &fpower &7[" + format(total) + " total kp]");
+      } else {
+        total = power * this.maxCharge * this.kickPower;
+        kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
+        message = message + colorize("&r with &c" + format(charge) + "&f charge and &a" + format(power) + " &fpower &7[" + format(total) + " total kp]");
       }
     } else if (power >= this.regularKick && charge <= 2.0D) {
-      kick = player.getLocation().getDirection().normalize().multiply(this.regularKick * charge * this.kickPower).setY(0.3D);
-      message = message + colorize("&r with &c" + format(power) + " &fpower.");
+      total = this.regularKick * charge * this.kickPower;
+      kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
+      message = message + colorize("&r with &c" + format(power) + " &fpower &7[" + format(total) + " total kp]");
     } else {
-      kick = player.getLocation().getDirection().normalize().multiply(power * charge * this.kickPower).setY(0.3D);
-      message = message + colorize("&r with &a" + format(power) + " &fpower.");
+      total = power * charge * this.kickPower;
+      kick = player.getLocation().getDirection().normalize().multiply(total).setY(0.3D);
+      message = message + colorize("&r with &a" + format(power) + " &fpower");
     }
 
     //this.organization.ballTouch(player);
@@ -177,6 +207,7 @@ public class Controller implements Listener {
     cube.setVelocity(cube.getVelocity().add(kick));
     cube.getWorld().playSound(cube.getLocation(), this.soundKick, 0.75F, 1.0F);
 
+    this.manager.getCooldown().setCooldown(player.getUniqueId(), System.currentTimeMillis());
     message = PlaceholderAPI.setPlaceholders(player, message);
     if (this.debugEnabled) for (Player onlinePlayers : this.manager.getPlugin().getServer().getOnlinePlayers())
       if (onlinePlayers.hasPermission("nfootcube.debug")) onlinePlayers.sendMessage(message);
