@@ -41,6 +41,8 @@ public class Controller implements Listener {
   private final EntityEffect entityEffect;
   private final PotionEffect potionEffect;
   public HashSet<Slime> cubes;
+  private double finalSpeed = 0.0;
+  private double finalLocation = 0.0;
 
   public Controller(Manager manager) {
     this.manager = manager;
@@ -120,14 +122,18 @@ public class Controller implements Listener {
   }
 
   private double getSpeed(Player player) {
-    return player.getVelocity().setY(player.getVelocity().getY() / 2.0).length();
+    Bukkit.getScheduler().runTaskAsynchronously(this.manager.getPlugin(), () -> this.finalSpeed = player.getVelocity().setY(player.getVelocity().getY() / 2.0).length());
+    return this.finalSpeed;
   }
 
   public double getDistance(Location start, Location end) {
-    start.setY(-0.25);
-    start.subtract(end).setY(-1.25);
-    if (start.getY() < 0.0) start.setY(0.0);
-    return start.length();
+    Bukkit.getScheduler().runTaskAsynchronously(this.manager.getPlugin(), () -> {
+      start.setY(-0.25);
+      start.subtract(end).setY(-1.25);
+      if (start.getY() < 0.0) start.setY(0.0);
+      this.finalLocation = start.length();
+    });
+    return this.finalLocation;
   }
 
   @EventHandler
