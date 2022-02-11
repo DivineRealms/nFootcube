@@ -26,6 +26,9 @@ Cube:
     # Default value: 1.0
     Charged_Kick: 1.0
 
+    # Default value is half of the xp bar (4.0).
+    Total_Kick_Power: 4.0
+
   # Control the kick power.
   # Changing this value increases the strenght of the kick.
   #
@@ -58,11 +61,16 @@ Cube:
   # The radius that is used to remove balls using the "clearcube" command.
   Remove_Distance: 100
 
-  # How long should players wait between each ball spawn?
+  # How long should players wait between each ball spawn (in seconds)?
   Spawn_Cooldown: 15
+
+  # What should the ball hit cooldown be (in milliseconds)?
+  Kick_Cooldown:
+    Enabled: true
+    Cooldown: 250
 
 # -------------------------------------------------------------------------------------------------
 # Toggle debug for more informations.
 # Debug currently only shows ball hits.
 # -------------------------------------------------------------------------------------------------
-Debug: false
+Debug: true
