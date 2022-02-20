@@ -23,7 +23,7 @@ public class Logger {
   }
 
   public void sendLong(String path) {
-    List<String> list = this.configuration.get().getStringList(path);
+    List<String> list = this.configuration.get("messages.yml").getStringList(path);
     list = this.manager.getColor().color(list);
 
     for (String messages : list)

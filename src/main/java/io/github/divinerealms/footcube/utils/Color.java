@@ -13,11 +13,11 @@ public class Color {
   public Color(Manager manager, Configuration configuration) {
     this.manager = manager;
     this.configuration = configuration;
-    this.prefix = this.configuration.get().getString("PREFIX");
+    this.prefix = this.configuration.get("messages.yml").getString("PREFIX");
   }
 
   public String color(String message) {
-    message = this.configuration.get().getString(message);
+    message = this.configuration.get("messages.yml").getString(message);
     message = message
         .replace("%prefix%", this.prefix)
         .replace("%time%", String.valueOf(System.currentTimeMillis() - this.manager.getPlugin().getTimeAtStart()));
@@ -25,7 +25,7 @@ public class Color {
   }
 
   public String color(String message, String permission) {
-    message = this.configuration.get().getString(message);
+    message = this.configuration.get("messages.yml").getString(message);
     message = message
         .replace("%prefix%", this.prefix)
         .replace("%permission%", permission)

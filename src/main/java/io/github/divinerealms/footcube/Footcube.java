@@ -15,14 +15,14 @@ public class Footcube extends JavaPlugin {
   @Override
   public void onDisable() {
     this.manager.getController().removeCubes();
-    this.configuration.saveMessages();
+    this.configuration.save("messages.yml");
   }
 
   @Override
   public void onEnable() {
     this.saveDefaultConfig();
 
-    this.configuration = new Configuration(this);
+    this.configuration = new Configuration(this, "messages.yml");
     this.manager = new Manager(this, this.configuration);
     this.setup();
   }
@@ -31,8 +31,8 @@ public class Footcube extends JavaPlugin {
     this.timeAtStart = System.currentTimeMillis();
 
     this.reloadConfig();
-    this.configuration.reloadMessages();
-    this.configuration.get().options().copyDefaults(true);
+    this.configuration.reload("messages.yml");
+    this.configuration.get("messages.yml").options().copyDefaults(true);
 
     final BaseCommand commands = new BaseCommand(this.manager, this.configuration);
     this.getCommand("nfootcube").setExecutor(commands);
@@ -46,10 +46,10 @@ public class Footcube extends JavaPlugin {
     this.getLogger().log(Level.INFO, "Loading commands...");
     this.getLogger().log(Level.INFO, "Loading listeners...");
     this.manager.getLogger().setLogo();
-    this.getLogger().log(Level.INFO, "Successfully enabled! (took " + (System.currentTimeMillis() - getTimeAtStart()) + "ms)");
+    this.getLogger().log(Level.INFO, "Successfully enabled! (took " + (System.currentTimeMillis() - this.timeAtStart) + "ms)");
 
     this.getServer().getPluginManager().registerEvents(this.manager.getController(), this);
-    this.getServer().getScheduler().runTaskTimer(this, this.manager.getController()::update, 1L, 1L);
+    this.getServer().getScheduler().runTaskTimer(this, this.manager.getController()::update, 20L, 1L);
   }
 
   public long getTimeAtStart() {

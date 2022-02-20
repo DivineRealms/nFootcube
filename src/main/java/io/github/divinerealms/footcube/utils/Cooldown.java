@@ -4,18 +4,18 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class Cooldown {
-  private static long CUBE_SPAWN_COOLDOWN;
-  private static long CUBE_KICK_COOLDOWN;
+  private final long cubeSpawnCooldown;
+  private final long cubeKickCooldown;
   private final HashMap<UUID, Long> cooldowns;
   private final String onCooldown;
   private final boolean isCubeKickCooldownEnabled;
 
   public Cooldown(final Manager manager, final Configuration configuration) {
-    CUBE_SPAWN_COOLDOWN = manager.getPlugin().getConfig().getInt("Cube.Spawn_Cooldown");
-    CUBE_KICK_COOLDOWN = manager.getPlugin().getConfig().getInt("Cube.Kick_Cooldown.Cooldown");
+    this.cubeSpawnCooldown = manager.getPlugin().getConfig().getInt("cube.spawn-cooldown");
+    this.cubeKickCooldown = manager.getPlugin().getConfig().getInt("cube.kick-cooldown.cooldown");
     this.cooldowns = new HashMap<>();
-    this.onCooldown = configuration.get().getString("ON_COOLDOWN");
-    this.isCubeKickCooldownEnabled = manager.getPlugin().getConfig().getBoolean("Cube.Kick_Cooldown.Enabled");
+    this.onCooldown = configuration.get("messages.yml").getString("ON_COOLDOWN");
+    this.isCubeKickCooldownEnabled = manager.getPlugin().getConfig().getBoolean("cube.kick-cooldown.enabled");
   }
 
   public void setCooldown(UUID player, Long time) {
@@ -28,11 +28,11 @@ public class Cooldown {
   }
 
   public long getCubeSpawnCooldown() {
-    return CUBE_SPAWN_COOLDOWN;
+    return this.cubeSpawnCooldown;
   }
 
   public long getCubeKickCooldown() {
-    return CUBE_KICK_COOLDOWN;
+    return this.cubeKickCooldown;
   }
 
   public long getTimeleft(UUID player, Long cooldown) {

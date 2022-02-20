@@ -29,6 +29,6 @@ public class Message {
   }
 
   public List<String> getStringList(final String path) {
-    return this.configuration.get().getStringList(path);
+    return this.configuration.get("messages.yml").getStringList(path);
   }
 }

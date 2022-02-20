@@ -2,7 +2,6 @@ package io.github.divinerealms.footcube.commands;
 
 import io.github.divinerealms.footcube.utils.Configuration;
 import io.github.divinerealms.footcube.utils.Manager;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -11,7 +10,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +22,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
   public BaseCommand(final Manager manager, final Configuration configuration) {
     this.manager = manager;
     this.distance = this.manager.getPlugin().getConfig().getDouble("Cube.Remove_Distance");
-    this.prefix = configuration.get().getString("PREFIX");
+    this.prefix = configuration.get("messages.yml").getString("PREFIX");
   }
 
   @Override
@@ -47,25 +45,12 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
             break;
           case "cube":
             if (player.hasPermission("nfootcube.cube")) {
-              long timeLeft = this.manager.getCooldown().getTimeleft(player.getUniqueId(), this.manager.getCooldown().getCubeSpawnCooldown());
+              long timeLeft;
+              if (player.hasPermission("nfootcube.cube.bypassCooldown")) timeLeft = 0;
+              else
+                timeLeft = this.manager.getCooldown().getTimeleft(player.getUniqueId(), this.manager.getCooldown().getCubeSpawnCooldown());
               if (timeLeft <= 0) {
                 Location loc = player.getLocation().add(0.0, 1.0, 0.0);
-
-                //TODO simplify immune
-                if (this.manager.getController().immuneMap.containsKey(player)) {
-                  Bukkit.getScheduler().cancelTask(this.manager.getController().immuneMap.get(player).getTaskId());
-                  this.manager.getController().immuneMap.remove(player);
-                  this.manager.getController().immune.remove(player);
-                }
-
-                this.manager.getController().immune.add(player);
-
-                BukkitTask taskID = Bukkit.getScheduler().runTaskLater(this.manager.getPlugin(), () -> {
-                  this.manager.getController().immune.remove(player);
-                  this.manager.getController().immuneMap.remove(player);
-                }, 60L);
-
-                this.manager.getController().immuneMap.put(player, taskID);
                 this.manager.getController().spawnCube(loc);
                 this.manager.getMessage().send(player, "CUBE_SPAWNED");
                 this.manager.getCooldown().setCooldown(player.getUniqueId(), System.currentTimeMillis());
@@ -78,13 +63,13 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
           case "clearcube":
             if (player.hasPermission("nfootcube.clearcube")) {
               if (!this.manager.getController().cubes.isEmpty()) {
-                for (Slime cube : this.manager.getController().cubes) {
-                  if (cube.getLocation().distance(player.getLocation()) < this.distance) {
-                    cube.setHealth(0.0D);
+                for (final Slime cube : this.manager.getController().cubes) {
+                  if (cube.getLocation().distance(player.getLocation()) <= this.distance) {
+                    cube.remove();
                     this.manager.getController().cubes.remove(cube);
                     this.manager.getMessage().send(player, "CUBE_CLEARED");
-                    break;
                   } else this.manager.getMessage().send(player, "CUBE_NOTCLEARED");
+                  break;
                 }
               } else this.manager.getMessage().send(player, "CUBE_NOTCLEARED");
             } else this.manager.getMessage().send(player, "INSUFFICIENT_PERMISSION", "nfootcube.clearcube");
@@ -93,7 +78,6 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
             this.manager.getMessage().send(player, "UNKNOWN_COMMAND");
             break;
         }
-
         return true;
       }
     } else {

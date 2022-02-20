@@ -12,40 +12,40 @@ import java.util.logging.Level;
 
 public class Configuration {
   private final Footcube plugin;
-  private FileConfiguration messages;
-  private File file;
+  private FileConfiguration configuration;
+  private File configurationFile;
 
-  public Configuration(final Footcube plugin) {
+  public Configuration(final Footcube plugin, final String configFile) {
     this.plugin = plugin;
-    this.saveDefaultMessages();
+    this.saveDefault(configFile);
   }
 
-  public FileConfiguration get() {
-    if (this.messages == null) this.reloadMessages();
-    return messages;
+  public FileConfiguration get(final String configFile) {
+    if (this.configuration == null) this.reload(configFile);
+    return this.configuration;
   }
 
-  public void reloadMessages() {
-    if (this.file == null) file = new File(this.plugin.getDataFolder(), "messages.yml");
-    messages = YamlConfiguration.loadConfiguration(this.file);
-    InputStream defaultStream = this.plugin.getResource("messages.yml");
+  public void reload(final String configFile) {
+    if (this.configurationFile == null) configurationFile = new File(this.plugin.getDataFolder(), configFile);
+    this.configuration = YamlConfiguration.loadConfiguration(this.configurationFile);
+    InputStream defaultStream = this.plugin.getResource(configFile);
     if (defaultStream != null) {
       YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defaultStream));
-      this.messages.setDefaults(defaultConfig);
+      this.configuration.setDefaults(defaultConfig);
     }
   }
 
-  public void saveMessages() {
-    if (this.messages == null || this.file == null) return;
+  public void save(final String configFile) {
+    if (this.configuration == null || this.configurationFile == null) return;
     try {
-      this.get().save(this.file);
+      this.get(configFile).save(this.configurationFile);
     } catch (IOException exception) {
-      this.plugin.getLogger().log(Level.SEVERE, "Could not save messages to " + this.file, exception);
+      this.plugin.getLogger().log(Level.SEVERE, "Could not save file to " + this.configurationFile, exception);
     }
   }
 
-  public void saveDefaultMessages() {
-    if (this.file == null) this.file = new File(this.plugin.getDataFolder(), "messages.yml");
-    if (!this.file.exists()) this.plugin.saveResource("messages.yml", false);
+  public void saveDefault(final String configFile) {
+    if (this.configurationFile == null) this.configurationFile = new File(this.plugin.getDataFolder(), configFile);
+    if (!this.configurationFile.exists()) this.plugin.saveResource(configFile, false);
   }
 }

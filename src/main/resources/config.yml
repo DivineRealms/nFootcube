@@ -12,65 +12,65 @@
 # -------------------------------------------------------------------------------------------------
 # Settings for the ball (cube).
 # -------------------------------------------------------------------------------------------------
-Cube:
+cube:
 
   # Control the power limit.
   # Changing these values results in balls being able to travel further away from a single hit.
-  Power_Limit:
+  power-limit:
 
     # Kicking power when not using shift or charging for less than 4 dots (XP Bar).
     # Default value: 2.0
-    Regular_Kick: 2.0
+    regular-kick: 2.0
 
     # Kick Power whilst shifting.
     # Default value: 1.0
-    Charged_Kick: 1.0
+    charged-kick: 1.0
 
     # Default value is half of the xp bar (4.0).
-    Total_Kick_Power: 4.0
+    total-kick-power: 4.0
 
   # Control the kick power.
   # Changing this value increases the strenght of the kick.
   #
   # Default value: 1.0
-  Kick_Power: 1.0
+  kick-power: 1.0
 
   # Settings for entity effect.
   # This setting can be toggled and will only work after a server restart.
-  Effect:
-    Enabled: false
+  effect:
+    enabled: false
 
     # List of effects: DEATH, FIREWORK_EXPLODE, HURT, IRON_GOLEM_ROSE, SHEEP_EAT, VILLAGER_ANGRY
     # VILLAGER_HAPPY, VILLAGER_HEART, WITCH_MAGIC, WOLF_HEARTS, WOLF_SHAKE, WOLF_SMOKE,
     # ZOMBIE_TRANSFORM.
-    Effect: HURT
+    type: HURT
 
   # Choose your own sound for when a player interacts with a ball.
   # This setting can be toggled and will only work after a server restart.
   #
   # List of available sounds: https://www.andre601.ch/Spigot-Sounds/sounds/mc-1.8/
-  Sounds:
-    Enabled: true
+  sounds:
+    enabled: true
 
     # Sound when moving the ball with the body and/or right clicking it.
-    Move: SLIME_WALK
+    move: SLIME_WALK
 
     # Sound when kicking the ball.
-    Kick: SUCCESSFUL_HIT
+    kick: SUCCESSFUL_HIT
 
   # The radius that is used to remove balls using the "clearcube" command.
-  Remove_Distance: 100
+  remove-distance: 100
 
   # How long should players wait between each ball spawn (in seconds)?
-  Spawn_Cooldown: 15
+  spawn-cooldown: 15
 
   # What should the ball hit cooldown be (in milliseconds)?
-  Kick_Cooldown:
-    Enabled: true
-    Cooldown: 250
+  kick-cooldown:
+    enabled: true
+    cooldown: 250
 
 # -------------------------------------------------------------------------------------------------
 # Toggle debug for more informations.
-# Debug currently only shows ball hits.
 # -------------------------------------------------------------------------------------------------
-Debug: true
+debug:
+  ball-hits: false
