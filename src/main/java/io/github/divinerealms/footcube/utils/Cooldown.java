@@ -6,14 +6,13 @@ import java.util.UUID;
 public class Cooldown {
   private final long cubeSpawnCooldown;
   private final long cubeKickCooldown;
-  private final HashMap<UUID, Long> cooldowns;
+  private final HashMap<UUID, Long> cooldowns = new HashMap<>();
   private final String onCooldown;
   private final boolean isCubeKickCooldownEnabled;
 
   public Cooldown(final Manager manager, final Configuration configuration) {
     this.cubeSpawnCooldown = manager.getPlugin().getConfig().getInt("cube.spawn-cooldown");
     this.cubeKickCooldown = manager.getPlugin().getConfig().getInt("cube.kick-cooldown.cooldown");
-    this.cooldowns = new HashMap<>();
     this.onCooldown = configuration.get("messages.yml").getString("ON_COOLDOWN");
     this.isCubeKickCooldownEnabled = manager.getPlugin().getConfig().getBoolean("cube.kick-cooldown.enabled");
   }

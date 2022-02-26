@@ -31,23 +31,18 @@ public class Controller implements Listener {
   private final Sound soundMove;
   private final Sound soundKick;
   private final EntityEffect cubeEffect;
-  private final PotionEffect potionEffect;
+  private final PotionEffect potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, -3, true);
   private final double kickPower;
   private final boolean isDebugEnabled;
   private final Manager manager;
-  private final HashMap<UUID, Vector> velocities;
-  private final HashMap<UUID, Long> kicked;
-  private final HashMap<UUID, Double> charges;
-  private final Map<UUID, Deque<Location>> lastLocations;
-  public HashSet<Slime> cubes;
+  private final HashMap<UUID, Vector> velocities = new HashMap<>();
+  private final HashMap<UUID, Long> kicked = new HashMap<>();
+  private final HashMap<UUID, Double> charges = new HashMap<>();
+  private final Map<UUID, Deque<Location>> lastLocations = new HashMap<>();
+  public HashSet<Slime> cubes = new HashSet<>();
 
   public Controller(final Manager manager) {
     this.manager = manager;
-    this.cubes = new HashSet<>();
-    this.velocities = new HashMap<>();
-    this.kicked = new HashMap<>();
-    this.charges = new HashMap<>();
-    this.lastLocations = new HashMap<>();
     this.kickPower = this.manager.getPlugin().getConfig().getDouble("cube.kick-power");
     this.chargedKickLimit = this.manager.getPlugin().getConfig().getDouble("cube.power-limit.charged-kick");
     this.regularKickLimit = this.manager.getPlugin().getConfig().getDouble("cube.power-limit.regular-kick");
@@ -57,7 +52,6 @@ public class Controller implements Listener {
     this.soundKick = Sound.valueOf(this.manager.getPlugin().getConfig().getString("cube.sounds.kick"));
     this.cubeEffect = EntityEffect.valueOf(this.manager.getPlugin().getConfig().getString("cube.effect.type"));
     this.isDebugEnabled = this.manager.getPlugin().getConfig().getBoolean("debug.ball-hits");
-    this.potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, -3, true);
     this.removeCubes();
   }
 
