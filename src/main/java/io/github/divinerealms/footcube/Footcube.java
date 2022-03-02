@@ -1,59 +1,69 @@
 package io.github.divinerealms.footcube;
 
 import io.github.divinerealms.footcube.commands.BaseCommand;
-import io.github.divinerealms.footcube.utils.Configuration;
-import io.github.divinerealms.footcube.utils.Manager;
+import io.github.divinerealms.footcube.managers.ListenerManager;
+import io.github.divinerealms.footcube.managers.ConfigManager;
+import io.github.divinerealms.footcube.managers.UtilManager;
+import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
 
 public class Footcube extends JavaPlugin {
-  private Configuration configuration;
-  private Manager manager;
-  private long timeAtStart = System.currentTimeMillis();
-
-  @Override
-  public void onDisable() {
-    this.manager.getController().removeCubes();
-    this.configuration.save("messages.yml");
-  }
+  @Getter private ConfigManager configManager;
+  @Getter private UtilManager utilManager;
+  @Getter private ListenerManager listenerManager;
+  @Getter private long timeAtStart = System.currentTimeMillis();
 
   @Override
   public void onEnable() {
-    this.saveDefaultConfig();
+    configManager = new ConfigManager(this);
+    getConfigManager().saveDefaultConfig("messages.yml");
+    saveDefaultConfig();
 
-    this.configuration = new Configuration(this, "messages.yml");
-    this.manager = new Manager(this, this.configuration);
-    this.setup();
+    utilManager = new UtilManager(this, getConfigManager());
+    getUtilManager().reloadUtils();
+    listenerManager = new ListenerManager(this, getUtilManager());
+
+    getUtilManager().getLogger().setLogo();
+    setup();
+  }
+
+  @Override
+  public void onDisable() {
+    shutdown();
   }
 
   public void reload() {
     this.timeAtStart = System.currentTimeMillis();
+    reloadConfig();
+    getUtilManager().reloadUtils();
 
-    this.reloadConfig();
-    this.configuration.reload("messages.yml");
-    this.configuration.get("messages.yml").options().copyDefaults(true);
-
-    final BaseCommand commands = new BaseCommand(this.manager, this.configuration);
-    this.getCommand("nfootcube").setExecutor(commands);
-    this.getCommand("nfootcube").setTabCompleter(commands);
+    shutdown();
+    setup();
   }
 
-  public void setup() {
+  private void setup() {
     this.timeAtStart = System.currentTimeMillis();
-    this.reload();
 
-    this.getLogger().log(Level.INFO, "Loading commands...");
-    this.getLogger().log(Level.INFO, "Loading listeners...");
-    this.manager.getLogger().setLogo();
-    this.getLogger().log(Level.INFO, "Successfully enabled! (took " + (System.currentTimeMillis() - this.timeAtStart) + "ms)");
+    getLogger().log(Level.INFO, "Loading commands...");
+    getCommand("nfootcube").setExecutor(new BaseCommand(this, getUtilManager()));
+    getCommand("nfootcube").setTabCompleter(new BaseCommand(this, getUtilManager()));
+    
+    getLogger().log(Level.INFO, "Loading listeners...");
+    if (getListenerManager().isRegistered()) getListenerManager().unregisterListeners();
+    getListenerManager().registerListeners();
+    getServer().getScheduler().runTaskTimer(this, getUtilManager().getPhysics()::update, 20L, 1L);
 
-    this.getServer().getPluginManager().registerEvents(this.manager.getController(), this);
-    this.getServer().getScheduler().runTaskTimer(this, this.manager.getController()::update, 20L, 1L);
+    final String duration = String.valueOf(System.currentTimeMillis() - getTimeAtStart());
+    getLogger().log(Level.INFO, "Successfully enabled! (took %duration%ms)".replace("%duration%", duration));
   }
 
-  public long getTimeAtStart() {
-    return this.timeAtStart;
+  private void shutdown() {
+    getUtilManager().getPhysics().removeCubes();
+    getServer().getScheduler().cancelTasks(this);
+    getServer().getMessenger().unregisterIncomingPluginChannel(this);
+    getListenerManager().unregisterListeners();
   }
 }
 

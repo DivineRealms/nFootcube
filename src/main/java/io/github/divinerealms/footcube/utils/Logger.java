@@ -1,57 +1,70 @@
 package io.github.divinerealms.footcube.utils;
 
-import org.bukkit.Bukkit;
+import io.github.divinerealms.footcube.Footcube;
+import io.github.divinerealms.footcube.managers.ConfigManager;
+import io.github.divinerealms.footcube.managers.UtilManager;
+import lombok.Getter;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class Logger {
-  private final Manager manager;
-  private final Configuration configuration;
-  private final List<String> logo = new ArrayList<>();
+  @Getter private final Footcube plugin;
+  @Getter private final UtilManager utilManager;
+  @Getter private final ConfigManager configManager;
+  @Getter private final FileConfiguration lang;
+  @Getter private final List<String> logo = new ArrayList<>();
 
-  public Logger(final Manager manager, final Configuration configuration) {
-    this.manager = manager;
-    this.configuration = configuration;
+  public Logger(final Footcube plugin, final UtilManager manager, final ConfigManager configManager) {
+    this.plugin = plugin;
+    this.utilManager = manager;
+    this.configManager = configManager;
+    this.lang = configManager.getConfig("messages.yml");
+  }
+
+  public void reload() {
+    getConfigManager().reloadConfig("messages.yml");
   }
 
   public void info(String path) {
-    path = this.manager.getColor().color(path);
-    Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', path));
+    path = getUtilManager().getColor().color(path);
+    getPlugin().getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', path));
   }
 
   public void sendLong(String path) {
-    List<String> list = this.configuration.get("messages.yml").getStringList(path);
-    list = this.manager.getColor().color(list);
+    List<String> list = getLang().getStringList(path);
+    list = getUtilManager().getColor().color(list);
 
     for (String messages : list)
-      Bukkit.getConsoleSender().sendMessage(messages);
+      getPlugin().getServer().getConsoleSender().sendMessage(messages);
   }
 
   public void debug(String message) {
-    this.info("[" + this.manager.getPlugin().getName() + "] &9[DEBUG] &r" + message);
+    info("[" + getPlugin().getName() + "] &9[DEBUG] &r" + message);
   }
 
   public void error(String message) {
-    this.info("[" + this.manager.getPlugin().getName() + "] &c[ERROR] &c" + message);
+    info("[" + getPlugin().getName() + "] &c[ERROR] &c" + message);
   }
 
   public void setLogo() {
-    final List<String> authors = this.manager.getPlugin().getDescription().getAuthors();
+    final List<String> authors = getPlugin().getDescription().getAuthors();
     final String formattedAuthors = authors.stream().map(String::valueOf).collect(Collectors.joining(", "));
 
-    this.logo.add("&9     __");
-    this.logo.add("&3  .&9'&f\".'\"&9'&3.   &2" + this.manager.getPlugin().getName() + " &bv" + this.manager.getPlugin().getDescription().getVersion());
-    this.logo.add("&b :.&f_.\"\"._&b.:  &5Authors: &d" + formattedAuthors);
-    this.logo.add("&3 :  &f\\__/&3  :");
-    this.logo.add("&b  '.&f/  \\&b.'   &8Running on " + this.manager.getPlugin().getServer().getName() + " - " + this.manager.getPlugin().getServer().getBukkitVersion());
-    this.logo.add("&9     \"\"");
+    getLogo().add("&9     __");
+    getLogo().add("&3  .&9'&f\".'\"&9'&3.   &2" + getPlugin().getName() + " &bv" + getPlugin().getDescription().getVersion());
+    getLogo().add("&b :.&f_.\"\"._&b.:  &5Authors: &d" + formattedAuthors);
+    getLogo().add("&3 :  &f\\__/&3  :");
+    getLogo().add("&b  '.&f/  \\&b.'   &8Running on " + getPlugin().getServer().getName() + " - " + getPlugin().getServer().getBukkitVersion());
+    getLogo().add("&9     \"\"");
 
-    for (String messages : this.logo) {
+    for (String messages : getLogo()) {
       messages = ChatColor.translateAlternateColorCodes('&', messages);
-      Bukkit.getConsoleSender().sendMessage(messages);
+      getPlugin().getServer().getConsoleSender().sendMessage(messages);
     }
   }
 }

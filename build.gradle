@@ -3,7 +3,7 @@ plugins {
 }
 
 group "io.github.divinerealms"
-version "1.0.0-b282"
+version "1.0.0"
 
 repositories {
     mavenCentral()
@@ -20,6 +20,10 @@ dependencies {
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
     compileOnly "me.clip:placeholderapi:2.11.1"
     compileOnly "dev.jcsoftware:JScoreboards:2.1.4-RELEASE"
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 }
 
 test {
