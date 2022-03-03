@@ -9,46 +9,42 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
-@SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
+@SuppressWarnings({"unused"})
 public class ConfigManager {
   @Getter private final Plugin plugin;
+  @Getter private final String configName;
   @Getter private File file;
-  @Getter private String configName;
   @Getter private FileConfiguration configuration;
 
-  public ConfigManager(final Plugin plugin) {
+  public ConfigManager(final Plugin plugin, final String name, final boolean singular) {
     this.plugin = plugin;
+    this.configName = name;
+    this.file = new File(plugin.getDataFolder(), name);
+    if (singular) saveDefaultConfig(name);
+    else saveConfig(name);
+    reloadConfig(name);
   }
 
-  public void reloadConfig(final String configName) {
-    if (getFile() == null) this.file = new File(getPlugin().getDataFolder(), configName);
+  public void reloadConfig(final String name) {
+    if (getFile() == null) this.file = new File(getPlugin().getDataFolder(), name);
     this.configuration = YamlConfiguration.loadConfiguration(getFile());
   }
 
-  public FileConfiguration getConfig(final String configName) {
-    if (getConfiguration() == null) reloadConfig(configName);
+  public FileConfiguration getConfig(final String name) {
+    if (getConfiguration() == null) reloadConfig(name);
     return getConfiguration();
   }
 
-  public void saveConfig(final String configName) {
+  public void saveConfig(final String name) {
     try {
-      getConfig(configName).save(getFile());
+      getConfig(name).save(getFile());
     } catch (IOException exception) {
       getPlugin().getLogger().log(Level.SEVERE, "Could not save file to " + getFile(), exception);
     }
   }
 
-  public void saveDefaultConfig(final String configName) {
-    if (getFile() == null) this.file = new File(getPlugin().getDataFolder(), configName);
-    if (!getFile().exists()) getPlugin().saveResource(configName, false);
-  }
-
-  public void createNewFile(final String configName, final boolean replaceExisting) {
-    try {
-      if (getFile().exists() && replaceExisting) getFile().delete();
-      getFile().createNewFile();
-    } catch (IOException exception) {
-      getPlugin().getLogger().log(Level.SEVERE, "Could not save file to " + getFile(), exception);
-    }
+  public void saveDefaultConfig(final String name) {
+    if (getFile() == null) this.file = new File(getPlugin().getDataFolder(), name);
+    if (!getFile().exists()) getPlugin().saveResource(name, false);
   }
 }

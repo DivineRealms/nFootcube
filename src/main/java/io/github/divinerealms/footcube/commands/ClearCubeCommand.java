@@ -1,6 +1,9 @@
 package io.github.divinerealms.footcube.commands;
 
 import io.github.divinerealms.footcube.managers.UtilManager;
+import io.github.divinerealms.footcube.utils.Logger;
+import io.github.divinerealms.footcube.utils.Messages;
+import io.github.divinerealms.footcube.utils.Physics;
 import lombok.Getter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,29 +15,41 @@ import org.bukkit.plugin.Plugin;
 public class ClearCubeCommand implements CommandExecutor {
   @Getter private final UtilManager utilManager;
   @Getter private final double distance;
+  @Getter private final Messages messages;
+  @Getter private final Logger logger;
+  @Getter private final Physics physics;
 
   public ClearCubeCommand(final Plugin plugin, final UtilManager utilManager) {
     this.utilManager = utilManager;
-    this.distance = plugin.getConfig().getDouble("Cube.Remove_Distance");
+    this.distance = plugin.getConfig().getDouble("cube.remove-distance");
+    this.messages = utilManager.getMessages();
+    this.logger = utilManager.getLogger();
+    this.physics = utilManager.getPhysics();
   }
 
   @Override
   public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-    if (sender instanceof Player) {
+    if (!(sender instanceof Player)) getLogger().send("INGAME_ONLY");
+    else {
       final Player player = (Player) sender;
-      if (player.hasPermission("nfootcube.clearcube")) {
-        if (!getUtilManager().getPhysics().getCubes().isEmpty()) {
-          for (final Slime cube : getUtilManager().getPhysics().getCubes()) {
-            if (cube.getLocation().distance(player.getLocation()) <= getDistance()) {
+      if (!player.hasPermission("nfootcube.clearcube"))
+        getMessages().send(player, "INSUFFICIENT_PERMISSION", "nfootcube.clearcube");
+      else {
+        if (getPhysics().getCubes().isEmpty()) getMessages().send(player, "CUBE_NOTCLEARED");
+        else {
+          for (final Slime cube : getPhysics().getCubes()) {
+            if (cube.getLocation().distance(player.getLocation()) > getDistance())
+              getMessages().send(player, "CUBE_NOTCLEARED");
+            else {
               cube.remove();
-              getUtilManager().getPhysics().getCubes().remove(cube);
-              getUtilManager().getChatty().send(player, "CUBE_CLEARED");
-            } else getUtilManager().getChatty().send(player, "CUBE_NOTCLEARED");
+              getPhysics().getCubes().remove(cube);
+              getMessages().send(player, "CUBE_CLEARED");
+            }
             break;
           }
-        } else getUtilManager().getChatty().send(player, "CUBE_NOTCLEARED");
-      } else getUtilManager().getChatty().send(player, "INSUFFICIENT_PERMISSION", "nfootcube.clearcube");
-    } else getUtilManager().getLogger().info("UNKNOWN_COMMAND");
+        }
+      }
+    }
     return true;
   }
 }

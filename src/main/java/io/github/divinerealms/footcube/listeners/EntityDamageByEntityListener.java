@@ -37,7 +37,7 @@ public class EntityDamageByEntityListener implements Listener {
         // TODO: disable removal in matches
         getUtilManager().getPhysics().getCubes().remove(cube);
         cube.remove();
-        getUtilManager().getChatty().send(player, "CUBE_CLEARED");
+        getUtilManager().getMessages().send(player, "CUBE_CLEARED");
       }
       return;
     }

@@ -2,6 +2,8 @@ package io.github.divinerealms.footcube.commands;
 
 import io.github.divinerealms.footcube.Footcube;
 import io.github.divinerealms.footcube.managers.UtilManager;
+import io.github.divinerealms.footcube.utils.Logger;
+import io.github.divinerealms.footcube.utils.Messages;
 import lombok.Getter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,10 +17,14 @@ import java.util.List;
 public class BaseCommand implements CommandExecutor, TabCompleter {
   @Getter private final Footcube plugin;
   @Getter private final UtilManager utilManager;
+  @Getter private final Logger logger;
+  @Getter private final Messages messages;
 
   public BaseCommand(final Footcube plugin, final UtilManager utilManager) {
     this.plugin = plugin;
     this.utilManager = utilManager;
+    this.logger = utilManager.getLogger();
+    this.messages = utilManager.getMessages();
   }
 
   @Override
@@ -35,7 +41,10 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
     } else if (args[0].equalsIgnoreCase("clearcube")) {
       final ClearCubeCommand clearCubeCommand = new ClearCubeCommand(getPlugin(), getUtilManager());
       clearCubeCommand.onCommand(sender, command, label, args);
-    } else getUtilManager().getChatty().send((Player) sender, "UNKNOWN_COMMAND");
+    } else {
+      if (sender instanceof Player) getMessages().send((Player) sender, "UNKNOWN_COMMAND");
+      else getLogger().send("UNKNOWN_COMMAND");
+    }
     return true;
   }
 
