@@ -5,6 +5,7 @@ import io.github.divinerealms.footcube.managers.ListenerManager;
 import io.github.divinerealms.footcube.managers.ConfigManager;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
@@ -18,11 +19,13 @@ public class Footcube extends JavaPlugin {
   @Override
   public void onEnable() {
     configManager = new ConfigManager(this);
-    getConfigManager().saveDefaultConfig("messages.yml");
+    configManager.saveDefaultConfig("messages.yml");
     saveDefaultConfig();
 
+    final FileConfiguration configuration = getConfigManager().getConfig("messages.yml");
+
     utilManager = new UtilManager(this, getConfigManager());
-    getUtilManager().reloadUtils();
+    utilManager.reloadUtils(configuration);
     listenerManager = new ListenerManager(this, getUtilManager());
 
     getUtilManager().getLogger().setLogo();
@@ -36,8 +39,9 @@ public class Footcube extends JavaPlugin {
 
   public void reload() {
     this.timeAtStart = System.currentTimeMillis();
-    reloadConfig();
-    getUtilManager().reloadUtils();
+    final FileConfiguration configuration = getConfigManager().getConfig("messages.yml");
+
+    getUtilManager().reloadUtils(configuration);
 
     shutdown();
     setup();

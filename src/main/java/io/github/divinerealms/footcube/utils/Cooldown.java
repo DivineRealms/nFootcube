@@ -2,21 +2,29 @@ package io.github.divinerealms.footcube.utils;
 
 import io.github.divinerealms.footcube.managers.ConfigManager;
 import lombok.Getter;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.UUID;
 
 public class Cooldown {
+  @Getter private final ConfigManager configManager;
   @Getter private final HashMap<UUID, Long> cooldowns = new HashMap<>();
   @Getter private long cubeSpawnCooldown, cubeKickCooldown;
   @Getter private String onCooldown;
   @Getter private boolean isCubeKickCooldownEnabled;
+  @Getter private FileConfiguration messages;
 
-  public void reload(final Plugin plugin, final ConfigManager configManager) {
+  public Cooldown(final ConfigManager configManager) {
+    this.configManager = configManager;
+  }
+
+  public void reload(final Plugin plugin) {
     this.cubeSpawnCooldown = plugin.getConfig().getInt("cube.spawn-cooldown");
     this.cubeKickCooldown = plugin.getConfig().getInt("cube.kick-cooldown.cooldown");
-    this.onCooldown = configManager.getConfig("messages.yml").getString("ON_COOLDOWN");
+    this.messages = configManager.getConfig("messages.yml");
+    this.onCooldown = messages.getString("ON_COOLDOWN");
     this.isCubeKickCooldownEnabled = plugin.getConfig().getBoolean("cube.kick-cooldown.enabled");
   }
 

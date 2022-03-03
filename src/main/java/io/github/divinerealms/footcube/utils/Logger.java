@@ -1,11 +1,10 @@
 package io.github.divinerealms.footcube.utils;
 
-import io.github.divinerealms.footcube.Footcube;
-import io.github.divinerealms.footcube.managers.ConfigManager;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,21 +12,17 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class Logger {
-  @Getter private final Footcube plugin;
-  @Getter private final UtilManager utilManager;
-  @Getter private final ConfigManager configManager;
-  @Getter private final FileConfiguration lang;
+  @Getter private final Plugin plugin;
   @Getter private final List<String> logo = new ArrayList<>();
+  @Getter private FileConfiguration messages;
 
-  public Logger(final Footcube plugin, final UtilManager manager, final ConfigManager configManager) {
+  public Logger(final Plugin plugin, final UtilManager utilManager) {
     this.plugin = plugin;
-    this.utilManager = manager;
-    this.configManager = configManager;
-    this.lang = configManager.getConfig("messages.yml");
   }
 
   public void reload() {
-    getConfigManager().reloadConfig("messages.yml");
+    this.messages = utilManager.getMessages().getLang();
+    this.format =
   }
 
   public void info(String path) {
@@ -36,7 +31,7 @@ public class Logger {
   }
 
   public void sendLong(String path) {
-    List<String> list = getLang().getStringList(path);
+    List<String> list = getMessages().getStringList(path);
     list = getUtilManager().getColor().color(list);
 
     for (String messages : list)

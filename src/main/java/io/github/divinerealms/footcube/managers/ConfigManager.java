@@ -21,8 +21,8 @@ public class ConfigManager {
   }
 
   public void reloadConfig(final String configName) {
-    if (getFile() == null) file = new File(getPlugin().getDataFolder(), configName);
-    configuration = YamlConfiguration.loadConfiguration(getFile());
+    if (getFile() == null) this.file = new File(getPlugin().getDataFolder(), configName);
+    this.configuration = YamlConfiguration.loadConfiguration(getFile());
   }
 
   public FileConfiguration getConfig(final String configName) {
@@ -39,7 +39,7 @@ public class ConfigManager {
   }
 
   public void saveDefaultConfig(final String configName) {
-    if (getFile() == null) file = new File(getPlugin().getDataFolder(), configName);
+    if (getFile() == null) this.file = new File(getPlugin().getDataFolder(), configName);
     if (!getFile().exists()) getPlugin().saveResource(configName, false);
   }
 
