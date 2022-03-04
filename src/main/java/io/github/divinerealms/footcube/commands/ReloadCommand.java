@@ -12,13 +12,11 @@ import org.bukkit.entity.Player;
 
 public class ReloadCommand implements CommandExecutor {
   @Getter private final Footcube plugin;
-  @Getter private final UtilManager utilManager;
   @Getter private final Logger logger;
   @Getter private final Messages messages;
 
   public ReloadCommand(final Footcube footcube, final UtilManager utilManager) {
     this.plugin = footcube;
-    this.utilManager = utilManager;
     this.logger = utilManager.getLogger();
     this.messages = utilManager.getMessages();
   }

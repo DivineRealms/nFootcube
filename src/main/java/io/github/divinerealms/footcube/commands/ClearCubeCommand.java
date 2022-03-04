@@ -13,15 +13,13 @@ import org.bukkit.entity.Slime;
 import org.bukkit.plugin.Plugin;
 
 public class ClearCubeCommand implements CommandExecutor {
-  @Getter private final UtilManager utilManager;
   @Getter private final double distance;
   @Getter private final Messages messages;
   @Getter private final Logger logger;
   @Getter private final Physics physics;
 
   public ClearCubeCommand(final Plugin plugin, final UtilManager utilManager) {
-    this.utilManager = utilManager;
-    this.distance = plugin.getConfig().getDouble("cube.remove-distance");
+    this.distance = plugin.getConfig().getInt("cube.remove-distance");
     this.messages = utilManager.getMessages();
     this.logger = utilManager.getLogger();
     this.physics = utilManager.getPhysics();
@@ -38,8 +36,8 @@ public class ClearCubeCommand implements CommandExecutor {
         if (getPhysics().getCubes().isEmpty()) getMessages().send(player, "CUBE_NOTCLEARED");
         else {
           for (final Slime cube : getPhysics().getCubes()) {
-            if (cube.getLocation().distance(player.getLocation()) > getDistance())
-              getMessages().send(player, "CUBE_NOTCLEARED");
+            final boolean isCubeClose = cube.getLocation().distance(player.getLocation()) <= getDistance();
+            if (!isCubeClose) getMessages().send(player, "CUBE_NOTCLEARED");
             else {
               cube.remove();
               getPhysics().getCubes().remove(cube);

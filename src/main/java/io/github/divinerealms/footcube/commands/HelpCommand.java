@@ -10,12 +10,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class HelpCommand implements CommandExecutor {
-  @Getter private final UtilManager utilManager;
   @Getter private final Messages messages;
   @Getter private final Logger logger;
 
   public HelpCommand(final UtilManager utilManager) {
-    this.utilManager = utilManager;
     this.messages = utilManager.getMessages();
     this.logger = utilManager.getLogger();
   }

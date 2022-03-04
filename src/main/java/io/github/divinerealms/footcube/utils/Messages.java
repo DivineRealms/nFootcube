@@ -12,13 +12,11 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public class Messages extends ConfigManager {
-  @Getter private final Footcube plugin;
   @Getter private FileConfiguration messages;
   @Getter private String prefix;
 
   public Messages(final Footcube plugin) {
     super(plugin, "messages.yml", true);
-    this.plugin = plugin;
   }
 
   public void reload() {
@@ -40,6 +38,10 @@ public class Messages extends ConfigManager {
     final List<String> list = getMessages().getStringList(path);
     for (final String message : list)
       player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+  }
+
+  public String colorizeMessage(final String message) {
+    return ChatColor.translateAlternateColorCodes('&', message);
   }
 
   public String colorize(final String path) {

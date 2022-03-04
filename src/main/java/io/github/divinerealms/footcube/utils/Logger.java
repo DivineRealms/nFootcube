@@ -3,8 +3,10 @@ package io.github.divinerealms.footcube.utils;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
 import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,17 +14,17 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class Logger {
-  @Getter private final Plugin plugin;
-  @Getter private final UtilManager utilManager;
+  @Getter private final Server server;
+  @Getter private final PluginDescriptionFile description;
   @Getter private final List<String> banner = new ArrayList<>();
   @Getter private final ConsoleCommandSender consoleSender;
   @Getter private final Messages messages;
   @Getter private String prefix;
 
   public Logger(final Plugin plugin, final UtilManager utilManager) {
-    this.plugin = plugin;
-    this.utilManager = utilManager;
-    this.consoleSender = plugin.getServer().getConsoleSender();
+    this.server = plugin.getServer();
+    this.description = plugin.getDescription();
+    this.consoleSender = server.getConsoleSender();
     this.messages = utilManager.getMessages();
   }
 
@@ -47,11 +49,11 @@ public class Logger {
   }
 
   public void sendBanner() {
-    final List<String> authors = getPlugin().getDescription().getAuthors();
+    final List<String> authors = getDescription().getAuthors();
     final String formattedAuthors = authors.stream().map(String::valueOf).collect(Collectors.joining(", "));
-    final String pluginName = getPlugin().getDescription().getFullName();
-    final String serverName = getPlugin().getServer().getName();
-    final String version = getPlugin().getServer().getBukkitVersion();
+    final String pluginName = getDescription().getFullName();
+    final String serverName = getServer().getName();
+    final String version = getServer().getBukkitVersion();
     final String serverNameVersion = serverName + " - " + version;
 
     getBanner().add("&9     __");

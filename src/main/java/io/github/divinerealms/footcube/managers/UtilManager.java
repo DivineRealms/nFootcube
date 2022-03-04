@@ -8,14 +8,12 @@ import io.github.divinerealms.footcube.utils.Physics;
 import lombok.Getter;
 
 public class UtilManager {
-  @Getter private final Footcube plugin;
   @Getter private final Messages messages;
   @Getter private final Cooldown cooldown;
   @Getter private final Logger logger;
   @Getter private final Physics physics;
 
   public UtilManager(final Footcube plugin) {
-    this.plugin = plugin;
     this.messages = new Messages(plugin);
     this.cooldown = new Cooldown(plugin, this);
     this.logger = new Logger(plugin, this);

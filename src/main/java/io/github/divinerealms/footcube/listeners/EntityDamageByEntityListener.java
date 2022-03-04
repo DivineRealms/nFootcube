@@ -1,9 +1,12 @@
 package io.github.divinerealms.footcube.listeners;
 
 import io.github.divinerealms.footcube.managers.UtilManager;
+import io.github.divinerealms.footcube.utils.Cooldown;
+import io.github.divinerealms.footcube.utils.Messages;
+import io.github.divinerealms.footcube.utils.Physics;
 import lombok.Getter;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.EventHandler;
@@ -13,18 +16,22 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.plugin.Plugin;
 
 public class EntityDamageByEntityListener implements Listener {
-  @Getter private final Plugin plugin;
-  @Getter private final UtilManager utilManager;
+  @Getter private final Physics physics;
+  @Getter private final Messages messages;
+  @Getter private final Cooldown cooldown;
+  @Getter private final Server server;
 
   public EntityDamageByEntityListener(final Plugin plugin, final UtilManager utilManager) {
-    this.plugin = plugin;
-    this.utilManager = utilManager;
+    this.physics = utilManager.getPhysics();
+    this.messages = utilManager.getMessages();
+    this.cooldown = utilManager.getCooldown();
+    this.server = plugin.getServer();
   }
 
   @EventHandler
   public void onSlamSlime(final EntityDamageByEntityEvent event) {
     if (!(event.getEntity() instanceof Slime)) return;
-    if (!getUtilManager().getPhysics().getCubes().contains((Slime) event.getEntity())) return;
+    if (!getPhysics().getCubes().contains((Slime) event.getEntity())) return;
     if (!(event.getDamager() instanceof Player)) return;
     if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
 
@@ -35,17 +42,17 @@ public class EntityDamageByEntityListener implements Listener {
       if (!player.hasPermission("nfootcube.clearcube")) event.setCancelled(true);
       else {
         // TODO: disable removal in matches
-        getUtilManager().getPhysics().getCubes().remove(cube);
+        getPhysics().getCubes().remove(cube);
         cube.remove();
-        getUtilManager().getMessages().send(player, "CUBE_CLEARED");
+        getMessages().send(player, "CUBE_CLEARED");
       }
       return;
     }
 
     String message = "&6[&eDebug&6] &b" + player.getName();
 
-    if (getUtilManager().getCooldown().isCubeKickCooldownEnabled()) {
-      final long timeLeft = getUtilManager().getCooldown().getTimeleftMillis(player.getUniqueId(), getUtilManager().getCooldown().getCubeKickCooldown());
+    if (getCooldown().isCubeKickCooldownEnabled()) {
+      final long timeLeft = getCooldown().getTimeleftMillis(player.getUniqueId(), getCooldown().getCubeKickCooldown());
       if (timeLeft > 0) {
         event.setCancelled(true);
         return;
@@ -55,23 +62,24 @@ public class EntityDamageByEntityListener implements Listener {
     double charge = 0;
     double power = 0.4;
 
-    if (getUtilManager().getPhysics().getCharges().containsKey(player.getUniqueId())) charge = getUtilManager().getPhysics().getCharges().get(player.getUniqueId()) * getUtilManager().getPhysics().getChargeLimit();
-    power += getUtilManager().getPhysics().getLastMoveVector(player.getUniqueId()).length() * 2 + 0.4;
+    if (getPhysics().getCharges().containsKey(player.getUniqueId()))
+      charge = getPhysics().getCharges().get(player.getUniqueId()) * getPhysics().getChargeLimit();
+    power += getPhysics().getLastMoveVector(player.getUniqueId()).length() * 2 + 0.4;
 
-    double total = charge * getUtilManager().getPhysics().getKickPower();
+    double total = charge * getPhysics().getKickPower();
     message += "&f made a";
 
     if (charge != 0) {
-      if (power >= getUtilManager().getPhysics().getChargedKickLimit()) {
-        total *= getUtilManager().getPhysics().getChargedKickLimit();
+      if (power >= getPhysics().getChargedKickLimit()) {
+        total *= getPhysics().getChargedKickLimit();
         message += " &acharged";
       } else {
         total *= power;
         message += "n unlimited &acharged";
       }
     } else {
-      if (power >= getUtilManager().getPhysics().getRegularKickLimit()) {
-        total = getUtilManager().getPhysics().getRegularKickLimit();
+      if (power >= getPhysics().getRegularKickLimit()) {
+        total = getPhysics().getRegularKickLimit();
         message += " &aregular";
       } else {
         total = power;
@@ -80,13 +88,18 @@ public class EntityDamageByEntityListener implements Listener {
     }
 
     cube.setVelocity(cube.getVelocity().add(player.getLocation().getDirection().normalize().multiply(total).setY(0.3)));
-    cube.getWorld().playSound(cube.getLocation(), getUtilManager().getPhysics().getSoundKick(), 0.75F, 1F);
+    cube.getWorld().playSound(cube.getLocation(), getPhysics().getSoundKick(), 0.75F, 1F);
     //TODO: this.organization.ballTouch(player);
 
-    getUtilManager().getCooldown().setCooldown(player.getUniqueId(), System.currentTimeMillis());
-    //message = PlaceholderAPI.setPlaceholders(player, message);
-    if (getUtilManager().getPhysics().isDebugEnabled())
-      getPlugin().getServer().broadcast(ChatColor.translateAlternateColorCodes('&', message + "&f kick &7[" + getUtilManager().getPhysics().format(power) + "PW * " + getUtilManager().getPhysics().format(charge) + "CH = " + getUtilManager().getPhysics().format(total) + "KP]"), "nfootcube.debug");
+    getCooldown().setCooldown(player.getUniqueId(), System.currentTimeMillis());
+
+    if (getPhysics().isDebugEnabled()) {
+      final double formattedPower = getPhysics().format(power);
+      final double formattedCharge = getPhysics().format(charge);
+      final double formattedTotal = getPhysics().format(total);
+      message += "&f kick &7[" + formattedPower + "PW * " + formattedCharge + "CH = " + formattedTotal + "KP]";
+      getServer().broadcast(getMessages().colorizeMessage(message), "nfootcube.debug");
+    }
 
     event.setCancelled(true);
   }

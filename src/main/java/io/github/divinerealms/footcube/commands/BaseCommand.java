@@ -54,6 +54,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
     else {
       final List<String> list = new ArrayList<>();
       if (args.length == 1) {
+        list.add("help");
         if (sender.hasPermission("nfootcube.admin")) {
           list.add("reload");
           list.add("cube");

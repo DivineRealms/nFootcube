@@ -1,4 +1,4 @@
-PREFIX: '&8[&b&lFUT&8] &b'
+PREFIX: '&8[&bFUT&8] &e'
 RELOAD: '%prefix%&aKonfiguracije plugina uspešno osvežene!'
 UNKNOWN_COMMAND: '%prefix%&cNepoznata komanda.'
 CUBE_SPAWNED: '%prefix%&aLopta stvorena.'

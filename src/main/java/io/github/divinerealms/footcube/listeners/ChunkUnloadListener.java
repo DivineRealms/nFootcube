@@ -1,6 +1,7 @@
 package io.github.divinerealms.footcube.listeners;
 
 import io.github.divinerealms.footcube.managers.UtilManager;
+import io.github.divinerealms.footcube.utils.Physics;
 import lombok.Getter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Slime;
@@ -9,10 +10,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkUnloadEvent;
 
 public class ChunkUnloadListener implements Listener {
-  @Getter private final UtilManager utilManager;
+  @Getter private final Physics physics;
 
   public ChunkUnloadListener(final UtilManager utilManager) {
-    this.utilManager = utilManager;
+    this.physics = utilManager.getPhysics();
   }
 
   @EventHandler
@@ -21,9 +22,8 @@ public class ChunkUnloadListener implements Listener {
     for (int length = (entities = event.getChunk().getEntities()).length, i = 0; i < length; ++i) {
       final Entity entity = entities[i];
       if (!(entity instanceof Slime)) return;
-      if (!getUtilManager().getPhysics().getCubes().contains(entity)) return;
-
-      getUtilManager().getPhysics().getCubes().remove((Slime) entity);
+      if (!getPhysics().getCubes().contains(entity)) return;
+      getPhysics().getCubes().remove((Slime) entity);
       entity.remove();
     }
   }
