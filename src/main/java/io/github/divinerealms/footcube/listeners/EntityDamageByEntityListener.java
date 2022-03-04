@@ -38,23 +38,21 @@ public class EntityDamageByEntityListener implements Listener {
     final Slime cube = (Slime) event.getEntity();
     final Player player = (Player) event.getDamager();
 
-    if (player.getGameMode() != GameMode.SURVIVAL) {
-      if (!player.hasPermission("nfootcube.clearcube")) event.setCancelled(true);
-      else {
-        // TODO: disable removal in matches
-        getPhysics().getCubes().remove(cube);
-        cube.remove();
-        getMessages().send(player, "CUBE_CLEARED");
-      }
-      return;
+    if (player.getGameMode() == GameMode.CREATIVE &&
+        player.hasPermission("nfootcube.clearcube")) {
+      // TODO: disable removal in matches
+      cube.remove();
+      getMessages().send(player, "cube.cleared");
     }
+
+    if (player.getGameMode() != GameMode.SURVIVAL) return;
 
     String message = "&6[&eDebug&6] &b" + player.getName();
 
     if (getCooldown().isCubeKickCooldownEnabled()) {
       final long timeLeft = getCooldown().getTimeleftMillis(player.getUniqueId(), getCooldown().getCubeKickCooldown());
       if (timeLeft > 0) {
-        event.setCancelled(true);
+        event.setCancelled(false);
         return;
       }
     }

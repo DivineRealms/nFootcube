@@ -37,7 +37,6 @@ public class Footcube extends JavaPlugin {
 
   private void setup() {
     getCommand("nfootcube").setExecutor(new BaseCommand(this, getUtilManager()));
-    getCommand("nfootcube").setTabCompleter(new BaseCommand(this, getUtilManager()));
 
     if (getListenerManager().isRegistered()) getListenerManager().unregisterListeners();
     getListenerManager().registerListeners();

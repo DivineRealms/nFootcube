@@ -24,7 +24,7 @@ public class Cooldown {
   public void reload() {
     this.cubeSpawnCooldown = getConfig().getInt("cube.spawn-cooldown");
     this.cubeKickCooldown = getConfig().getInt("cube.kick-cooldown.cooldown");
-    this.onCooldown = getMessages().getString("ON_COOLDOWN");
+    this.onCooldown = getMessages().getString("on-cooldown");
     this.isCubeKickCooldownEnabled = getConfig().getBoolean("cube.kick-cooldown.enabled");
   }
 

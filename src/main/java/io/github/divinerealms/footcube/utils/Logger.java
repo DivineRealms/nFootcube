@@ -2,7 +2,6 @@ package io.github.divinerealms.footcube.utils;
 
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
-import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.Plugin;
@@ -29,23 +28,17 @@ public class Logger {
   }
 
   public void reload() {
-    this.prefix = getMessages().getString("PREFIX");
+    this.prefix = getMessages().getString("prefix");
   }
 
-  public void send(final String path) {
-    final String message = getMessages().colorize(path);
-    getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
-  }
-
-  public void info(String message) {
-    message = getPrefix() + message;
-    getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+  public void info(final String message) {
+    getConsoleSender().sendMessage(getMessages().colorizeMessage(getPrefix() + message));
   }
 
   public void sendLong(final String path) {
     final List<String> list = getMessages().getStringList(path);
     for (String message : list)
-      getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+      getConsoleSender().sendMessage(getMessages().colorizeMessage(message));
   }
 
   public void sendBanner() {
@@ -63,9 +56,7 @@ public class Logger {
     getBanner().add("&b  '.&f/  \\&b.'   &8Running on " + serverNameVersion);
     getBanner().add("&9     \"\"");
 
-    for (String message : getBanner()) {
-      message = ChatColor.translateAlternateColorCodes('&', message);
-      getConsoleSender().sendMessage(message);
-    }
+    for (final String message : getBanner())
+      getConsoleSender().sendMessage(getMessages().colorizeMessage(message));
   }
 }

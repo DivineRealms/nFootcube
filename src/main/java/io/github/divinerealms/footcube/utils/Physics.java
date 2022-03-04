@@ -81,11 +81,11 @@ public class Physics {
     if (getKicked().size() > 0)
       getKicked().entrySet().removeIf(entry -> System.currentTimeMillis() > getKicked().get(entry.getKey()) + 1000L);
 
-    for (UUID uuid : getCharges().keySet()) {
-      final Player player = getServer().getPlayer(uuid);
-      final double charge = getCharges().get(uuid);
+    for (final UUID playerID : getCharges().keySet()) {
+      final Player player = getServer().getPlayer(playerID);
+      final double charge = getCharges().get(playerID);
       final double nextCharge = 1 - (1 - charge) * 0.925;
-      getCharges().put(uuid, nextCharge);
+      getCharges().put(playerID, nextCharge);
       player.setExp((float) nextCharge);
     }
 
@@ -93,9 +93,9 @@ public class Physics {
 
     while (cubesIterator.hasNext()) {
       final Slime cube = cubesIterator.next();
-      final UUID id = cube.getUniqueId();
+      final UUID cubeID = cube.getUniqueId();
       Vector oldV = cube.getVelocity();
-      if (getVelocities().containsKey(id)) oldV = getVelocities().get(id);
+      if (getVelocities().containsKey(cubeID)) oldV = getVelocities().get(cubeID);
       if (cube.isDead()) cubesIterator.remove();
 
       boolean sound = false;
@@ -139,27 +139,29 @@ public class Physics {
       if (sound) cube.getWorld().playSound(cube.getLocation(), getSoundMove(), 0.5F, 1F);
 
       for (final Player player : onlinePlayers) {
-        double delta2 = getDistance(cube.getLocation(), player.getLocation()).length();
-        if (delta2 < newV.length() * 1.3) {
-          final Vector loc = cube.getLocation().toVector();
-          final Vector nextLoc = new Vector(loc.getX(), loc.getY(), loc.getZ()).add(newV);
-          boolean rightDirection = true;
-          final Vector pDir = new Vector(player.getLocation().getX() - loc.getX(), 0, player.getLocation().getZ() - loc.getZ());
-          final Vector cDir = new Vector(newV.getX(), 0, newV.getZ()).normalize();
-          int px = 1, pz = 1, cx = 1, cz = 1;
-          if (pDir.getX() < 0) px = -1;
-          if (pDir.getZ() < 0) pz = -1;
-          if (cDir.getX() < 0) cx = -1;
-          if (cDir.getZ() < 0) cz = -1;
-          if ((px != cx && pz != cz) || ((px != cx || pz != cz) && (cx * pDir.getX() <= cx * cz * px * cDir.getZ() || cz * pDir.getZ() <= cz * cx * pz * cDir.getX())))
-            rightDirection = false;
-          if (rightDirection && loc.getY() < player.getLocation().getY() + 2 && loc.getY() > player.getLocation().getY() - 1 && nextLoc.getY() < player.getLocation().getY() + 2 && nextLoc.getY() > player.getLocation().getY() - 1) {
-            double a = newV.getZ() / newV.getX();
-            double b = loc.getZ() - a * loc.getX();
-            double c = player.getLocation().getX();
-            double d = player.getLocation().getZ();
-            final double D = Math.abs(a * c - d + b) / Math.sqrt(a * a + 1);
-            if (D < 0.8D) newV.multiply(delta2 / newV.length());
+        if (player.getGameMode() == GameMode.SURVIVAL) {
+          double delta2 = getDistance(cube.getLocation(), player.getLocation()).length();
+          if (delta2 < newV.length() * 1.3) {
+            final Vector loc = cube.getLocation().toVector();
+            final Vector nextLoc = new Vector(loc.getX(), loc.getY(), loc.getZ()).add(newV);
+            boolean rightDirection = true;
+            final Vector pDir = new Vector(player.getLocation().getX() - loc.getX(), 0, player.getLocation().getZ() - loc.getZ());
+            final Vector cDir = new Vector(newV.getX(), 0, newV.getZ()).normalize();
+            int px = 1, pz = 1, cx = 1, cz = 1;
+            if (pDir.getX() < 0) px = -1;
+            if (pDir.getZ() < 0) pz = -1;
+            if (cDir.getX() < 0) cx = -1;
+            if (cDir.getZ() < 0) cz = -1;
+            if ((px != cx && pz != cz) || ((px != cx || pz != cz) && (cx * pDir.getX() <= cx * cz * px * cDir.getZ() || cz * pDir.getZ() <= cz * cx * pz * cDir.getX())))
+              rightDirection = false;
+            if (rightDirection && loc.getY() < player.getLocation().getY() + 2 && loc.getY() > player.getLocation().getY() - 1 && nextLoc.getY() < player.getLocation().getY() + 2 && nextLoc.getY() > player.getLocation().getY() - 1) {
+              double a = newV.getZ() / newV.getX();
+              double b = loc.getZ() - a * loc.getX();
+              double c = player.getLocation().getX();
+              double d = player.getLocation().getZ();
+              final double D = Math.abs(a * c - d + b) / Math.sqrt(a * a + 1);
+              if (D < 0.8D) newV.multiply(delta2 / newV.length());
+            }
           }
         }
       }
@@ -169,7 +171,7 @@ public class Physics {
 
       if (isCubeEffectEnabled()) cube.playEffect(getCubeEffect());
 
-      getVelocities().put(id, newV);
+      getVelocities().put(cubeID, newV);
     }
   }
 

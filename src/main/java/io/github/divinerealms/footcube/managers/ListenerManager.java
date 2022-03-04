@@ -25,7 +25,7 @@ public class ListenerManager {
 
     pluginManager.registerEvents(new ChunkUnloadListener(getUtilManager()), getPlugin());
     pluginManager.registerEvents(new EntityDamageByEntityListener(getPlugin(), getUtilManager()), getPlugin());
-    pluginManager.registerEvents(new EntityDamageListener(getUtilManager()), getPlugin());
+    pluginManager.registerEvents(new EntityDamageListener(), getPlugin());
     pluginManager.registerEvents(new FoodLevelChangeListener(), getPlugin());
     pluginManager.registerEvents(new PlayerInteractEntityListener(getUtilManager()), getPlugin());
     pluginManager.registerEvents(new PlayerMoveListener(getUtilManager()), getPlugin());
