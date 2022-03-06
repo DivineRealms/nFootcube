@@ -1,20 +1,19 @@
 package io.github.divinerealms.footcube.commands;
 
-import io.github.divinerealms.footcube.Footcube;
-import io.github.divinerealms.footcube.managers.UtilManager;
 import io.github.divinerealms.footcube.configs.Messages;
+import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class ReloadCommand implements CommandExecutor {
-  @Getter private final Footcube plugin;
+public class ReloadconfigCommand implements CommandExecutor {
+  @Getter private final UtilManager utilManager;
   @Getter private final Messages messages;
 
-  public ReloadCommand(final Footcube footcube, final UtilManager utilManager) {
-    this.plugin = footcube;
+  public ReloadconfigCommand(final UtilManager utilManager) {
+    this.utilManager = utilManager;
     this.messages = utilManager.getMessages();
   }
 
@@ -25,11 +24,8 @@ public class ReloadCommand implements CommandExecutor {
       return false;
     }
 
-    if (args.length < 2) getMessages().sendLong(sender, "reload.usage");
-    else if (args[1].equalsIgnoreCase("confirm")) {
-      getPlugin().reload();
-      getMessages().send(sender, "reload.plugin");
-    } else getMessages().send(sender, "unknown-command");
+    getUtilManager().reloadUtils();
+    getMessages().send(sender, "reload.config");
     return true;
   }
 }

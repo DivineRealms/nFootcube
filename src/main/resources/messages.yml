@@ -1,16 +1,8 @@
 prefix: '&8[&bFUT&8] &e'
 reload:
-  usage:
-    - '&9&m═══════════════════════════════════&r'
-    - '&r &r'
-    - '&b &lFUT CRAFT&7 - &e&oOsvežavanje plugina.'
-    - '&r &r'
-    - '&6 /&enfc reload all&7: &fCeo plugin.'
-    - '&6 /&enfc reload lang&7: &fSamo messages.yml'
-    - '&r &r'
-    - '&9&m═══════════════════════════════════&r'
+  usage: '%prefix%&cUpozorenje: obrisaćete sve lopte ovom komandom! Ako se slažete kucajte &6/&enfc reload confirm&c.'
   plugin: '%prefix%&aPlugin uspešno osvežen!'
-  lang: '%prefix%&aPoruke plugina uspešno osvežene!'
+  config: '%prefix%&aPoruke plugina uspešno osvežene!'
 unknown-command: '%prefix%&cNepoznata komanda.'
 insufficient-permission: '%prefix%&cNemate dozvolu za to (%permission%).'
 ingame-only: '%prefix%&cOva komanda se može koristiti samo u igri.'

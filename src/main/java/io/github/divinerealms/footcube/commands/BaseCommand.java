@@ -24,6 +24,9 @@ public class BaseCommand implements CommandExecutor {
     if (args.length < 1 || args[0].equalsIgnoreCase("help")) {
       final HelpCommand helpCommand = new HelpCommand(getUtilManager());
       helpCommand.onCommand(sender, command, label, args);
+    } else if (args[0].equalsIgnoreCase("reloadconfig")) {
+      final ReloadconfigCommand reloadconfigCommand = new ReloadconfigCommand(getUtilManager());
+      reloadconfigCommand.onCommand(sender, command, label, args);
     } else if (args[0].equalsIgnoreCase("reload")) {
       final ReloadCommand reloadCommand = new ReloadCommand(getPlugin(), getUtilManager());
       reloadCommand.onCommand(sender, command, label, args);
