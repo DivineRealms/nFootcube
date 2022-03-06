@@ -1,6 +1,6 @@
 package io.github.divinerealms.footcube.listeners;
 
-import io.github.divinerealms.footcube.configs.PlayerData;
+import io.github.divinerealms.footcube.managers.PlayerDataManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.event.EventHandler;
@@ -12,15 +12,16 @@ import java.util.UUID;
 
 public class PlayerJoinListener implements Listener {
   @Getter private final Plugin plugin;
+  @Getter @Setter private PlayerDataManager playerDataManager;
   @Getter @Setter private UUID playerID;
-  @Getter @Setter private PlayerData playerData;
 
-  public PlayerJoinListener(Plugin plugin) {
+  public PlayerJoinListener(final Plugin plugin) {
     this.plugin = plugin;
   }
 
-  @EventHandler public void onPlayerJoin(final PlayerJoinEvent playerJoinEvent) {
+  @EventHandler
+  public void onPlayerJoin(final PlayerJoinEvent playerJoinEvent) {
     setPlayerID(playerJoinEvent.getPlayer().getUniqueId());
-    setPlayerData(new PlayerData(getPlugin(), getPlayerID()));
+    setPlayerDataManager(new PlayerDataManager(getPlugin(), getPlayerID()));
   }
 }

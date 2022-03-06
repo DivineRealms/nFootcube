@@ -12,7 +12,7 @@ public class Settings extends ConfigManager {
   @Getter private FileConfiguration settings;
 
   public Settings(final Plugin plugin) {
-    super(plugin, "settings.yml", true);
+    super(plugin, "settings.yml");
   }
 
   public void reload() {

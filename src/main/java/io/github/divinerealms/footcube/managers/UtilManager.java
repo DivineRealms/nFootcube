@@ -7,6 +7,9 @@ import io.github.divinerealms.footcube.utils.Cooldown;
 import io.github.divinerealms.footcube.utils.Logger;
 import io.github.divinerealms.footcube.utils.Physics;
 import lombok.Getter;
+import lombok.Setter;
+
+import java.util.UUID;
 
 public class UtilManager {
   @Getter private final Messages messages;
@@ -14,6 +17,7 @@ public class UtilManager {
   @Getter private final Cooldown cooldown;
   @Getter private final Logger logger;
   @Getter private final Physics physics;
+  @Getter @Setter private UUID playerID;
 
   public UtilManager(final Footcube plugin) {
     this.messages = new Messages(plugin);

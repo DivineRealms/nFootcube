@@ -31,10 +31,8 @@ public class Physics {
   @Getter private double chargeLimit, regularKickLimit, chargedKickLimit, kickPower;
   @Getter @Setter private double power = 0.4, charge = 0, total;
   @Getter private boolean isSoundEnabled, isCubeEffectEnabled, isDebugEnabled;
-  @Getter private String prefix;
   @Getter private Sound soundMove, soundKick;
   @Getter private EntityEffect cubeEffect;
-  @Getter private String ballHitsDebug;
 
   public Physics(final Plugin plugin, final UtilManager utilManager) {
     this.plugin = plugin;
@@ -54,8 +52,6 @@ public class Physics {
     this.soundKick = getSettings().getSound("cube.sounds.kick");
     this.cubeEffect = getSettings().getEntityEffect("cube.effect.type");
     this.isDebugEnabled = getSettings().getBoolean("debug.ball-hits");
-    this.prefix = getMessages().getPrefix();
-    this.ballHitsDebug = getMessages().getString("debug.ball-hits");
     removeCubes();
   }
 
@@ -199,17 +195,8 @@ public class Physics {
     for (final Entity entity : entities) if (entity instanceof Slime) entity.remove();
   }
 
-  public String getBallHitsDebug(final Player player) {
-    return getMessages().colorizeMessage(getBallHitsDebug()
-        .replace("%prefix%", getPrefix())
-        .replace("%player_name%", player.getName())
-        .replace("%power%", String.valueOf(format(getPower())))
-        .replace("%charge%", String.valueOf(format(getCharge())))
-        .replace("%total%", String.valueOf(format(getTotal()))));
-  }
-
   public void debug(final Player player) {
-    if (isDebugEnabled()) getServer().broadcastMessage(getBallHitsDebug(player));
+    if (isDebugEnabled()) getMessages().ballHitsDebug(player.getName(), String.valueOf(format(getPower())), String.valueOf(format(getCharge())), String.valueOf(format(getTotal())));
   }
 
   public void playSound(final Slime cube, final boolean isKick) {

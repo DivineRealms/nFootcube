@@ -13,26 +13,17 @@ import java.util.logging.Level;
 @SuppressWarnings({"unused"})
 public class ConfigManager {
   @Getter private final Plugin plugin;
-  @Getter private final String configName;
-  @Getter private final File folder;
-  @Getter private final boolean singular;
   @Getter @Setter private File file;
   @Getter @Setter private FileConfiguration configuration;
 
-  public ConfigManager(final Plugin plugin, final String name, final boolean singular) {
+  public ConfigManager(final Plugin plugin, final String name) {
     this.plugin = plugin;
-    this.configName = name;
-    this.singular = singular;
-    this.folder = new File(plugin.getDataFolder() + File.separator + "playerdata");
-    if (!singular && !getFolder().exists()) getFolder().mkdir();
-    this.file = singular ? new File(plugin.getDataFolder(), name) : new File(folder, name);
-    if (singular) saveDefaultConfig(name);
-    else saveConfig(name);
-    reloadConfig(name);
+    this.file = new File(plugin.getDataFolder(), name);
+    saveDefaultConfig(name);
   }
 
   public void reloadConfig(final String name) {
-    if (getFile() == null) setFile(isSingular() ? new File(getPlugin().getDataFolder(), name) : new File(getFolder(), name));
+    if (getFile() == null) setFile(new File(getPlugin().getDataFolder(), name));
     setConfiguration(YamlConfiguration.loadConfiguration(getFile()));
   }
 
@@ -44,7 +35,7 @@ public class ConfigManager {
   public void saveConfig(final String name) {
     try {
       getConfig(name).save(getFile());
-    } catch (IOException exception) {
+    } catch (final IOException exception) {
       getPlugin().getLogger().log(Level.SEVERE, "Could not save file to " + getFile(), exception);
     }
   }

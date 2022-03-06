@@ -3,30 +3,35 @@ package io.github.divinerealms.footcube.configs;
 import io.github.divinerealms.footcube.Footcube;
 import io.github.divinerealms.footcube.managers.ConfigManager;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
 public class Messages extends ConfigManager {
+  @Getter private final Plugin plugin;
   @Getter private final ConsoleCommandSender consoleSender;
-  @Getter private FileConfiguration messages;
-  @Getter private String prefix;
+  @Getter @Setter private FileConfiguration messages;
+  @Getter @Setter private String prefix, ballHitsDebug;
 
   public Messages(final Footcube plugin) {
-    super(plugin, "messages.yml", true);
+    super(plugin, "messages.yml");
+    this.plugin = plugin;
     this.consoleSender = plugin.getServer().getConsoleSender();
   }
 
   public void reload() {
     reloadConfig("messages.yml");
-    this.messages = getConfig("messages.yml");
-    this.prefix = getMessages().getString("prefix");
+    setMessages(getConfig("messages.yml"));
+    setPrefix(getMessages().getString("prefix"));
+    setBallHitsDebug(getMessages().getString("debug.ball-hits"));
   }
 
   public void send(final CommandSender sender, final String path) {
@@ -69,7 +74,7 @@ public class Messages extends ConfigManager {
   }
 
   public String getString(final String path) {
-    return getMessages().getString(path, ChatColor.RED + "String \"" + path + "\" not found, check your messages.yml");
+    return getMessages().getString(path, ChatColor.RED + "String \"" + path + "&c\" not found, check your messages.yml");
   }
 
   public List<String> getStringList(final String path) {
@@ -83,5 +88,14 @@ public class Messages extends ConfigManager {
 
   public double getDouble(final String path) {
     return getMessages().getDouble(path, 0);
+  }
+
+  public void ballHitsDebug(final String playerName, final String power, final String charge, final String total) {
+    getPlugin().getServer().broadcastMessage(colorizeMessage(getBallHitsDebug()
+        .replace("%prefix%", getPrefix())
+        .replace("%player_name%", playerName)
+        .replace("%power%", power)
+        .replace("%charge%", charge)
+        .replace("%total%", total)));
   }
 }
