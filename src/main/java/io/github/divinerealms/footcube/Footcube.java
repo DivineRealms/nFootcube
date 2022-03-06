@@ -39,6 +39,7 @@ public class Footcube extends JavaPlugin {
 
     if (getListenerManager().isRegistered()) getListenerManager().unregisterListeners();
     getListenerManager().registerListeners();
+
     getServer().getScheduler().runTaskTimer(this, getUtilManager().getPhysics()::update, 20L, 1L);
   }
 

@@ -15,16 +15,14 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public class Messages extends ConfigManager {
-  @Getter private final String name = "settings.yml";
-  @Getter private final Plugin plugin;
+  @Getter private final String name = "messages.yml";
   @Getter private final ConsoleCommandSender consoleSender;
   @Getter @Setter private FileConfiguration messages;
   @Getter @Setter private String prefix, ballHitsDebug;
 
   public Messages(final Plugin plugin) {
     super(plugin, "messages.yml");
-    this.plugin = plugin;
-    this.consoleSender = plugin.getServer().getConsoleSender();
+    this.consoleSender = getPlugin().getServer().getConsoleSender();
   }
 
   public void reload() {

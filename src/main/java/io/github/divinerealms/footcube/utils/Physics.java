@@ -1,7 +1,7 @@
 package io.github.divinerealms.footcube.utils;
 
 import io.github.divinerealms.footcube.configs.Messages;
-import io.github.divinerealms.footcube.configs.Settings;
+import io.github.divinerealms.footcube.configs.Config;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +21,7 @@ public class Physics {
   @Getter private final Plugin plugin;
   @Getter private final Server server;
   @Getter private final Messages messages;
-  @Getter private final Settings settings;
+  @Getter private final Config config;
   @Getter private final PotionEffect potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, -3, true);
   @Getter private final HashMap<UUID, Vector> velocities = new HashMap<>();
   @Getter private final HashMap<UUID, Long> kicked = new HashMap<>();
@@ -38,20 +38,20 @@ public class Physics {
     this.plugin = plugin;
     this.server = plugin.getServer();
     this.messages = utilManager.getMessages();
-    this.settings = utilManager.getSettings();
+    this.config = utilManager.getConfig();
   }
 
   public void reload() {
-    this.kickPower = getSettings().getDouble("cube.kick-power");
-    this.chargedKickLimit = getSettings().getDouble("cube.power-limit.charged-kick");
-    this.regularKickLimit = getSettings().getDouble("cube.power-limit.regular-kick");
-    this.chargeRefillSpeed = getSettings().getDouble("cube.power-limit.charge-refill");
-    this.isSoundEnabled = getSettings().getBoolean("cube.sounds.enabled");
-    this.isCubeEffectEnabled = getSettings().getBoolean("cube.effect.enabled");
-    this.soundMove = getSettings().getSound("cube.sounds.move");
-    this.soundKick = getSettings().getSound("cube.sounds.kick");
-    this.cubeEffect = getSettings().getEntityEffect("cube.effect.type");
-    this.isDebugEnabled = getSettings().getBoolean("debug.ball-hits");
+    this.kickPower = getConfig().getDouble("cube.kick-power");
+    this.chargedKickLimit = getConfig().getDouble("cube.power-limit.charged-kick");
+    this.regularKickLimit = getConfig().getDouble("cube.power-limit.regular-kick");
+    this.chargeRefillSpeed = getConfig().getDouble("cube.power-limit.charge-refill");
+    this.isSoundEnabled = getConfig().getBoolean("cube.sounds.enabled");
+    this.isCubeEffectEnabled = getConfig().getBoolean("cube.effect.enabled");
+    this.soundMove = getConfig().getSound("cube.sounds.move");
+    this.soundKick = getConfig().getSound("cube.sounds.kick");
+    this.cubeEffect = getConfig().getEntityEffect("cube.effect.type");
+    this.isDebugEnabled = getConfig().getBoolean("debug.ball-hits");
     removeCubes();
   }
 
