@@ -1,6 +1,5 @@
 package io.github.divinerealms.footcube.configs;
 
-import io.github.divinerealms.footcube.Footcube;
 import io.github.divinerealms.footcube.managers.ConfigManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +21,7 @@ public class Messages extends ConfigManager {
   @Getter @Setter private FileConfiguration messages;
   @Getter @Setter private String prefix, ballHitsDebug;
 
-  public Messages(final Footcube plugin) {
+  public Messages(final Plugin plugin) {
     super(plugin, "messages.yml");
     this.plugin = plugin;
     this.consoleSender = plugin.getServer().getConsoleSender();
