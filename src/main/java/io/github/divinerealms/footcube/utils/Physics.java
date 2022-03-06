@@ -28,7 +28,7 @@ public class Physics {
   @Getter private final HashMap<UUID, Double> charges = new HashMap<>();
   @Getter private final Map<UUID, Deque<Location>> lastLocations = new HashMap<>();
   @Getter private final HashSet<Slime> cubes = new HashSet<>();
-  @Getter private double chargeLimit, regularKickLimit, chargedKickLimit, kickPower;
+  @Getter private double regularKickLimit, chargedKickLimit, kickPower;
   @Getter @Setter private double power = 0.4, charge = 0, total;
   @Getter private boolean isSoundEnabled, isCubeEffectEnabled, isDebugEnabled;
   @Getter private Sound soundMove, soundKick;
@@ -45,7 +45,6 @@ public class Physics {
     this.kickPower = getSettings().getDouble("cube.kick-power");
     this.chargedKickLimit = getSettings().getDouble("cube.power-limit.charged-kick");
     this.regularKickLimit = getSettings().getDouble("cube.power-limit.regular-kick");
-    this.chargeLimit = getSettings().getDouble("cube.power-limit.total-kick-power");
     this.isSoundEnabled = getSettings().getBoolean("cube.sounds.enabled");
     this.isCubeEffectEnabled = getSettings().getBoolean("cube.effect.enabled");
     this.soundMove = getSettings().getSound("cube.sounds.move");
@@ -74,7 +73,7 @@ public class Physics {
 
   public double getTotalKickPower(final UUID playerID) {
     setPower(0.4 + getLastMoveVector(playerID).length() * 2 + 0.4);
-    setCharge(getCharges().containsKey(playerID) ? getCharges().get(playerID) * getChargeLimit() : 0);
+    setCharge(getCharges().containsKey(playerID) ? getCharges().get(playerID) * 8 : 0);
     setTotal(((getCharge() != 0) ? (getCharge() * Math.min(getPower(), getChargedKickLimit())) : Math.min(getPower(), getRegularKickLimit())) * getKickPower());
     return getTotal();
   }
@@ -196,7 +195,7 @@ public class Physics {
   }
 
   public void debug(final Player player) {
-    if (isDebugEnabled()) getMessages().ballHitsDebug(player.getName(), String.valueOf(format(getPower())), String.valueOf(format(getCharge())), String.valueOf(format(getTotal())));
+    if (isDebugEnabled()) getMessages().ballHitsDebug(player.getName(), format(getPower()), format(getCharge()), format(getKickPower()), format(getTotal()));
   }
 
   public void playSound(final Slime cube, final boolean isKick) {

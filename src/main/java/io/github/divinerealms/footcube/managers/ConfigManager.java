@@ -32,6 +32,11 @@ public class ConfigManager {
     return getConfiguration();
   }
 
+  public void saveDefaultConfig(final String name) {
+    if (getFile() == null) setFile(new File(getPlugin().getDataFolder(), name));
+    if (!getFile().exists()) getPlugin().saveResource(name, false);
+  }
+
   public void saveConfig(final String name) {
     try {
       getConfig(name).save(getFile());
@@ -40,8 +45,10 @@ public class ConfigManager {
     }
   }
 
-  public void saveDefaultConfig(final String name) {
-    if (getFile() == null) setFile(new File(getPlugin().getDataFolder(), name));
-    if (!getFile().exists()) getPlugin().saveResource(name, false);
+  public static String getNotFound(final String path, final String file) {
+    return "&cString \"&e%path%&c\" in \"&4%file%&c\" not found!"
+        .replace("%path%", path)
+        .replace("%file%", file)
+        .replace('&', '\u00a7');
   }
 }

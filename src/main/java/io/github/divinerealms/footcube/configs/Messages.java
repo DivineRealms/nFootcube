@@ -16,6 +16,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public class Messages extends ConfigManager {
+  @Getter private final String name = "settings.yml";
   @Getter private final Plugin plugin;
   @Getter private final ConsoleCommandSender consoleSender;
   @Getter @Setter private FileConfiguration messages;
@@ -28,10 +29,10 @@ public class Messages extends ConfigManager {
   }
 
   public void reload() {
-    reloadConfig("messages.yml");
-    setMessages(getConfig("messages.yml"));
-    setPrefix(getMessages().getString("prefix"));
-    setBallHitsDebug(getMessages().getString("debug.ball-hits"));
+    reloadConfig(getName());
+    setMessages(getConfig(getName()));
+    setPrefix(getString("prefix"));
+    setBallHitsDebug(getString("debug.ball-hits"));
   }
 
   public void send(final CommandSender sender, final String path) {
@@ -74,7 +75,7 @@ public class Messages extends ConfigManager {
   }
 
   public String getString(final String path) {
-    return getMessages().getString(path, ChatColor.RED + "String \"" + path + "&c\" not found, check your messages.yml");
+    return getMessages().getString(path, getNotFound(path, getName()));
   }
 
   public List<String> getStringList(final String path) {
@@ -90,12 +91,13 @@ public class Messages extends ConfigManager {
     return getMessages().getDouble(path, 0);
   }
 
-  public void ballHitsDebug(final String playerName, final String power, final String charge, final String total) {
+  public void ballHitsDebug(final String playerName, final double power, final double charge, final double kickpower, final double total) {
     getPlugin().getServer().broadcastMessage(colorizeMessage(getBallHitsDebug()
         .replace("%prefix%", getPrefix())
         .replace("%player_name%", playerName)
-        .replace("%power%", power)
-        .replace("%charge%", charge)
-        .replace("%total%", total)));
+        .replace("%power%", "" + power)
+        .replace("%charge%", "" + charge)
+        .replace("%kickpower%", "" + kickpower)
+        .replace("%total%", "" + total)));
   }
 }

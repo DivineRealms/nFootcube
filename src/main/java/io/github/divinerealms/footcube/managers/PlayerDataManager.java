@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.logging.Level;
 
+@SuppressWarnings("unused")
 public class PlayerDataManager {
   @Getter private final Plugin plugin;
   @Getter @Setter private File file;
@@ -27,6 +28,18 @@ public class PlayerDataManager {
     setData(YamlConfiguration.loadConfiguration(getFile()));
   }
 
+  public int getInt(final String path) {
+    return getData().getInt(path);
+  }
+
+  public void setInt(final String path, final int value) {
+    getData().set(path, value);
+  }
+
+  public void riseInt(final String path) {
+    getData().set(path, getInt(path) + 1);
+  }
+
   public FileConfiguration getPlayerData(final UUID playerID) {
     if (this.getData() == null) reloadPlayerData(playerID);
     return this.getData();
@@ -38,17 +51,5 @@ public class PlayerDataManager {
     } catch (final IOException exception) {
       getPlugin().getLogger().log(Level.SEVERE, "Could not save file to " + getFile(), exception);
     }
-  }
-
-  public int getInt(final String path) {
-    return getData().getInt(path);
-  }
-
-  public void setInt(final String path, final int value) {
-    getData().set(path, value);
-  }
-
-  public void riseInt(final String path) {
-    getData().set(path, getInt(path) + 1);
   }
 }

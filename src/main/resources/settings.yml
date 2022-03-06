@@ -26,9 +26,6 @@ cube:
     # Default value: 1.0
     charged-kick: 1.0
 
-    # Default value is half of the xp bar (4.0).
-    total-kick-power: 4.0
-
   # Control the kick power.
   # Changing this value increases the strenght of the kick.
   #
@@ -67,12 +64,10 @@ cube:
   # What should the ball hit cooldown be (in milliseconds)?
   kick-cooldown:
     enabled: true
-    cooldown: 250
-
-
+    cooldown: 500
 
 # -------------------------------------------------------------------------------------------------
 # Toggle debug for more informations.
 # -------------------------------------------------------------------------------------------------
 debug:
-  ball-hits: false
+  ball-hits: true

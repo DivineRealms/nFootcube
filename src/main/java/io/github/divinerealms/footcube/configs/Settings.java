@@ -2,22 +2,24 @@ package io.github.divinerealms.footcube.configs;
 
 import io.github.divinerealms.footcube.managers.ConfigManager;
 import lombok.Getter;
-import org.bukkit.ChatColor;
+import lombok.Setter;
 import org.bukkit.EntityEffect;
 import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
+@SuppressWarnings("unused")
 public class Settings extends ConfigManager {
-  @Getter private FileConfiguration settings;
+  @Getter private final String name = "settings.yml";
+  @Getter @Setter private FileConfiguration settings;
 
   public Settings(final Plugin plugin) {
     super(plugin, "settings.yml");
   }
 
   public void reload() {
-    reloadConfig("settings.yml");
-    this.settings = getConfig("settings.yml");
+    reloadConfig(getName());
+    setSettings(getConfig(getName()));
   }
 
   public boolean getBoolean(final String path) {
@@ -29,11 +31,11 @@ public class Settings extends ConfigManager {
   }
 
   public double getDouble(final String path) {
-    return getSettings().getDouble(path, 0D);
+    return getSettings().getDouble(path, 0);
   }
 
   public String getString(final String path) {
-    return getSettings().getString(path, ChatColor.RED + "String \"" + path + "\" not found, check your settings.yml");
+    return getSettings().getString(path, getNotFound(path, getName()));
   }
 
   public Sound getSound(final String path) {
