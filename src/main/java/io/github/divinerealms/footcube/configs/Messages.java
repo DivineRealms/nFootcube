@@ -91,13 +91,13 @@ public class Messages extends ConfigManager {
     return getMessages().getDouble(path, 0);
   }
 
-  public void ballHitsDebug(final String playerName, final double power, final double charge, final double kickpower, final double total) {
+  public void ballHitsDebug(final String playerName, final String power, final String charge, final String kickpower, final String total) {
     getPlugin().getServer().broadcastMessage(colorizeMessage(getBallHitsDebug()
         .replace("%prefix%", getPrefix())
         .replace("%player_name%", playerName)
-        .replace("%power%", "" + power)
-        .replace("%charge%", "" + charge)
-        .replace("%kickpower%", "" + kickpower)
-        .replace("%total%", "" + total)));
+        .replace("%power%", power)
+        .replace("%charge%", charge)
+        .replace("%kickpower%", kickpower)
+        .replace("%total%", total)));
   }
 }

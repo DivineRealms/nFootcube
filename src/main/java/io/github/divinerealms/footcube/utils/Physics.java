@@ -28,7 +28,7 @@ public class Physics {
   @Getter private final HashMap<UUID, Double> charges = new HashMap<>();
   @Getter private final Map<UUID, Deque<Location>> lastLocations = new HashMap<>();
   @Getter private final HashSet<Slime> cubes = new HashSet<>();
-  @Getter private double regularKickLimit, chargedKickLimit, kickPower;
+  @Getter private double regularKickLimit, chargedKickLimit, kickPower, chargeRefillSpeed;
   @Getter @Setter private double power = 0.4, charge = 0, total;
   @Getter private boolean isSoundEnabled, isCubeEffectEnabled, isDebugEnabled;
   @Getter private Sound soundMove, soundKick;
@@ -45,6 +45,7 @@ public class Physics {
     this.kickPower = getSettings().getDouble("cube.kick-power");
     this.chargedKickLimit = getSettings().getDouble("cube.power-limit.charged-kick");
     this.regularKickLimit = getSettings().getDouble("cube.power-limit.regular-kick");
+    this.chargeRefillSpeed = getSettings().getDouble("cube.power-limit.charge-refill");
     this.isSoundEnabled = getSettings().getBoolean("cube.sounds.enabled");
     this.isCubeEffectEnabled = getSettings().getBoolean("cube.effect.enabled");
     this.soundMove = getSettings().getSound("cube.sounds.move");
@@ -54,8 +55,8 @@ public class Physics {
     removeCubes();
   }
 
-  public double format(final Double value) {
-    return (double) Math.round(value * 100) / 100;
+  public String format(final Double value) {
+    return String.format("%.2f", value);
   }
 
   public Vector getLastMoveVector(final UUID playerID) {
@@ -98,7 +99,7 @@ public class Physics {
     for (final UUID playerID : getCharges().keySet()) {
       final Player player = getServer().getPlayer(playerID);
       final double charge = getCharges().get(playerID);
-      final double nextCharge = 1 - (1 - charge) * 0.925;
+      final double nextCharge = 1 - (1 - charge) * getChargeRefillSpeed();
       getCharges().put(playerID, nextCharge);
       player.setExp((float) nextCharge);
     }

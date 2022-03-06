@@ -26,6 +26,10 @@ cube:
     # Default value: 1.0
     charged-kick: 1.0
 
+    # Charge Refill speed;
+    # Default value: 0.95
+    charge-refill: 0.925
+
   # Control the kick power.
   # Changing this value increases the strenght of the kick.
   #

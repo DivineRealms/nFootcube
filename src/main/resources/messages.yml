@@ -16,7 +16,7 @@ insufficient-permission: '%prefix%&cNemate dozvolu za to (%permission%).'
 ingame-only: '%prefix%&cOva komanda se može koristiti samo u igri.'
 on-cooldown: '%prefix%&cProbajte ovu komandu ponovo za %timeleft% sekundi.'
 debug:
-  ball-hits: '%prefix%&b%player_name% &7[%power%PW * %charge%CH * %kickpower%KP = %total%]'
+  ball-hits: '%prefix%&b%player_name% &7[&ePW %power% &7* &dCH %charge% &7* &cKP %kickpower% &7= &aTOTAL KP %total%&7]'
 help:
   - '&9&m═══════════════════════════════════&r'
   - '&r &r'
