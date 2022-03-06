@@ -22,7 +22,7 @@ public class Messages extends ConfigManager {
 
   public Messages(final Plugin plugin) {
     super(plugin, "messages.yml");
-    this.consoleSender = getPlugin().getServer().getConsoleSender();
+    this.consoleSender = plugin.getServer().getConsoleSender();
   }
 
   public void reload() {

@@ -25,7 +25,7 @@ public class ReloadCommand implements CommandExecutor {
       return false;
     }
 
-    if (args.length < 2) getMessages().sendLong(sender, "reload.usage");
+    if (args.length < 2) getMessages().send(sender, "reload.usage");
     else if (args[1].equalsIgnoreCase("confirm")) {
       getPlugin().reload();
       getMessages().send(sender, "reload.plugin");

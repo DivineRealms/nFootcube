@@ -30,7 +30,6 @@ public class Physics {
   @Getter private final HashSet<Slime> cubes = new HashSet<>();
   @Getter private double regularKickLimit, chargedKickLimit, kickPower, chargeRefillSpeed;
   @Getter @Setter private double power = 0.4, charge = 0, total;
-  @Getter private boolean isSoundEnabled, isCubeEffectEnabled, isDebugEnabled;
   @Getter private Sound soundMove, soundKick;
   @Getter private EntityEffect cubeEffect;
 
@@ -46,12 +45,9 @@ public class Physics {
     this.chargedKickLimit = getConfig().getDouble("cube.power-limit.charged-kick");
     this.regularKickLimit = getConfig().getDouble("cube.power-limit.regular-kick");
     this.chargeRefillSpeed = getConfig().getDouble("cube.power-limit.charge-refill");
-    this.isSoundEnabled = getConfig().getBoolean("cube.sounds.enabled");
-    this.isCubeEffectEnabled = getConfig().getBoolean("cube.effect.enabled");
     this.soundMove = getConfig().getSound("cube.sounds.move");
     this.soundKick = getConfig().getSound("cube.sounds.kick");
     this.cubeEffect = getConfig().getEntityEffect("cube.effect.type");
-    this.isDebugEnabled = getConfig().getBoolean("debug.ball-hits");
     removeCubes();
   }
 
@@ -184,7 +180,7 @@ public class Physics {
       cube.setVelocity(newV);
       cube.addPotionEffect(getPotionEffect());
 
-      if (isCubeEffectEnabled()) cube.playEffect(getCubeEffect());
+      if (getConfig().isCubeEffectEnabled()) cube.playEffect(getCubeEffect());
 
       getVelocities().put(cubeID, newV);
     }
@@ -196,11 +192,12 @@ public class Physics {
   }
 
   public void debug(final Player player) {
-    if (isDebugEnabled()) getMessages().ballHitsDebug(player.getName(), format(getPower()), format(getCharge()), format(getKickPower()), format(getTotal()));
+    if (getConfig().isBallsHitsDebug())
+      getMessages().ballHitsDebug(player.getName(), format(getPower()), format(getCharge()), format(getKickPower()), format(getTotal()));
   }
 
   public void playSound(final Slime cube, final boolean isKick) {
-    if (isSoundEnabled())
+    if (getConfig().isSoundEnabled())
       cube.getWorld().playSound(cube.getLocation(), (isKick ? getSoundKick() : getSoundMove()), 0.75F, 1F);
   }
 }

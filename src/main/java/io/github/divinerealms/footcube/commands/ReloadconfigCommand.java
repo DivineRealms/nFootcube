@@ -1,5 +1,6 @@
 package io.github.divinerealms.footcube.commands;
 
+import io.github.divinerealms.footcube.configs.Config;
 import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
@@ -10,10 +11,12 @@ import org.bukkit.entity.Player;
 
 public class ReloadconfigCommand implements CommandExecutor {
   @Getter private final UtilManager utilManager;
+  @Getter private final Config config;
   @Getter private final Messages messages;
 
   public ReloadconfigCommand(final UtilManager utilManager) {
     this.utilManager = utilManager;
+    this.config = utilManager.getConfig();
     this.messages = utilManager.getMessages();
   }
 
@@ -24,7 +27,8 @@ public class ReloadconfigCommand implements CommandExecutor {
       return false;
     }
 
-    getUtilManager().reloadUtils();
+    getConfig().reload();
+    getMessages().reload();
     getMessages().send(sender, "reload.config");
     return true;
   }
