@@ -1,4 +1,4 @@
-package io.github.divinerealms.footcube.utils;
+package io.github.divinerealms.footcube.configs;
 
 import io.github.divinerealms.footcube.Footcube;
 import io.github.divinerealms.footcube.managers.ConfigManager;
@@ -69,7 +69,7 @@ public class Messages extends ConfigManager {
   }
 
   public String getString(final String path) {
-    return getMessages().getString(path);
+    return getMessages().getString(path, ChatColor.RED + "String \"" + path + "\" not found, check your messages.yml");
   }
 
   public List<String> getStringList(final String path) {
@@ -78,10 +78,10 @@ public class Messages extends ConfigManager {
   }
 
   public int getInt(final String path) {
-    return getMessages().getInt(path);
+    return getMessages().getInt(path, 0);
   }
 
   public double getDouble(final String path) {
-    return getMessages().getDouble(path);
+    return getMessages().getDouble(path, 0);
   }
 }

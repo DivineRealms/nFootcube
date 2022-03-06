@@ -1,9 +1,16 @@
 prefix: '&8[&bFUT&8] &e'
-reload: '%prefix%&aKonfiguracije plugina uspešno osvežene!'
+reload:
+  usage:
+    - '&cUputstvo: &6/&enfc reload &2<&aall&2/&alang&2>'
+    - '&fPrimer &6/&enfc reload all&7 - &fosvežava ceo plugin.'
+  plugin: '%prefix%&aPlugin uspešno osvežen!'
+  lang: '%prefix%&aPoruke plugina uspešno osvežene!'
 unknown-command: '%prefix%&cNepoznata komanda.'
 insufficient-permission: '%prefix%&cNemate dozvolu za to (%permission%).'
 ingame-only: '%prefix%&cOva komanda se može koristiti samo u igri.'
 on-cooldown: '%prefix%&cProbajte ovu komandu ponovo za %timeleft% sekundi.'
+debug:
+  ball-hits: '%prefix%&b%player_name% &7[%power%PW * %charge%CH = %total%KP]'
 help:
   - '&9&m═══════════════════════════════════&r'
   - '&b &lFUT CRAFT&7 - &e&oLista dostupnih komandi.'

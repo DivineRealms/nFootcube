@@ -2,7 +2,7 @@ package io.github.divinerealms.footcube.listeners;
 
 import io.github.divinerealms.footcube.managers.UtilManager;
 import io.github.divinerealms.footcube.utils.Cooldown;
-import io.github.divinerealms.footcube.utils.Messages;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.utils.Physics;
 import lombok.Getter;
 import org.bukkit.GameMode;
@@ -16,20 +16,22 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.plugin.Plugin;
 
 public class EntityDamageByEntityListener implements Listener {
-  @Getter private final Physics physics;
+  @Getter private final Plugin plugin;
+  @Getter private final Server server;
   @Getter private final Messages messages;
   @Getter private final Cooldown cooldown;
-  @Getter private final Server server;
+  @Getter private final Physics physics;
 
   public EntityDamageByEntityListener(final Plugin plugin, final UtilManager utilManager) {
-    this.physics = utilManager.getPhysics();
+    this.plugin = plugin;
+    this.server = plugin.getServer();
     this.messages = utilManager.getMessages();
     this.cooldown = utilManager.getCooldown();
-    this.server = plugin.getServer();
+    this.physics = utilManager.getPhysics();
   }
 
   @EventHandler
-  public void onSlamSlime(final EntityDamageByEntityEvent event) {
+  public void onEntityDamageByEntity(final EntityDamageByEntityEvent event) {
     if (!(event.getEntity() instanceof Slime)) return;
     if (!getPhysics().getCubes().contains((Slime) event.getEntity())) return;
     if (!(event.getDamager() instanceof Player)) return;
@@ -38,16 +40,13 @@ public class EntityDamageByEntityListener implements Listener {
     final Slime cube = (Slime) event.getEntity();
     final Player player = (Player) event.getDamager();
 
-    if (player.getGameMode() == GameMode.CREATIVE &&
-        player.hasPermission("nfootcube.clearcube")) {
+    if (player.getGameMode() == GameMode.CREATIVE && player.hasPermission("nfootcube.clearcube")) {
       // TODO: disable removal in matches
       cube.remove();
       getMessages().send(player, "cube.cleared");
     }
 
     if (player.getGameMode() != GameMode.SURVIVAL) return;
-
-    String message = "&6[&eDebug&6] &b" + player.getName();
 
     if (getCooldown().isCubeKickCooldownEnabled()) {
       final long timeLeft = getCooldown().getTimeleftMillis(player.getUniqueId(), getCooldown().getCubeKickCooldown());
@@ -57,47 +56,12 @@ public class EntityDamageByEntityListener implements Listener {
       }
     }
 
-    double charge = 0;
-    double power = 0.4;
-
-    if (getPhysics().getCharges().containsKey(player.getUniqueId()))
-      charge = getPhysics().getCharges().get(player.getUniqueId()) * getPhysics().getChargeLimit();
-    power += getPhysics().getLastMoveVector(player.getUniqueId()).length() * 2 + 0.4;
-
-    double total = charge * getPhysics().getKickPower();
-    message += "&f made a";
-
-    if (charge != 0) {
-      if (power >= getPhysics().getChargedKickLimit()) {
-        total *= getPhysics().getChargedKickLimit();
-        message += " &acharged";
-      } else {
-        total *= power;
-        message += "n unlimited &acharged";
-      }
-    } else {
-      if (power >= getPhysics().getRegularKickLimit()) {
-        total = getPhysics().getRegularKickLimit();
-        message += " &aregular";
-      } else {
-        total = power;
-        message += "n unlimited &aregular";
-      }
-    }
-
-    cube.setVelocity(cube.getVelocity().add(player.getLocation().getDirection().normalize().multiply(total).setY(0.3)));
-    cube.getWorld().playSound(cube.getLocation(), getPhysics().getSoundKick(), 0.75F, 1F);
+    cube.setVelocity(cube.getVelocity().add(player.getLocation().getDirection().normalize().multiply(getPhysics().getTotalKickPower(player.getUniqueId())).setY(0.3)));
+    getPhysics().playSound(cube, true);
     //TODO: this.organization.ballTouch(player);
 
+    getPhysics().debug(player);
     getCooldown().setCooldown(player.getUniqueId(), System.currentTimeMillis());
-
-    if (getPhysics().isDebugEnabled()) {
-      final double formattedPower = getPhysics().format(power);
-      final double formattedCharge = getPhysics().format(charge);
-      final double formattedTotal = getPhysics().format(total);
-      message += "&f kick &7[" + formattedPower + "PW * " + formattedCharge + "CH = " + formattedTotal + "KP]";
-      getServer().broadcast(getMessages().colorizeMessage(message), "nfootcube.debug");
-    }
 
     event.setCancelled(true);
   }

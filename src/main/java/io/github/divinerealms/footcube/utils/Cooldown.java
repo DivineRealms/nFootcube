@@ -1,31 +1,31 @@
 package io.github.divinerealms.footcube.utils;
 
+import io.github.divinerealms.footcube.configs.Messages;
+import io.github.divinerealms.footcube.configs.Settings;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.UUID;
 
 public class Cooldown {
   @Getter private final Messages messages;
-  @Getter private final FileConfiguration config;
+  @Getter private final Settings settings;
   @Getter private final HashMap<UUID, Long> cooldowns = new HashMap<>();
   @Getter private long cubeSpawnCooldown, cubeKickCooldown;
   @Getter private String onCooldown;
   @Getter private boolean isCubeKickCooldownEnabled;
 
-  public Cooldown(final Plugin plugin, final UtilManager utilManager) {
-    this.config = plugin.getConfig();
+  public Cooldown(final UtilManager utilManager) {
     this.messages = utilManager.getMessages();
+    this.settings = utilManager.getSettings();
   }
 
   public void reload() {
-    this.cubeSpawnCooldown = getConfig().getInt("cube.spawn-cooldown");
-    this.cubeKickCooldown = getConfig().getInt("cube.kick-cooldown.cooldown");
+    this.cubeSpawnCooldown = getSettings().getInt("cube.spawn-cooldown");
+    this.cubeKickCooldown = getSettings().getInt("cube.kick-cooldown.cooldown");
     this.onCooldown = getMessages().getString("on-cooldown");
-    this.isCubeKickCooldownEnabled = getConfig().getBoolean("cube.kick-cooldown.enabled");
+    this.isCubeKickCooldownEnabled = getSettings().getBoolean("cube.kick-cooldown.enabled");
   }
 
   public void setCooldown(final UUID playerID, final Long time) {

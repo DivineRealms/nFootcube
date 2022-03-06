@@ -1,5 +1,6 @@
 package io.github.divinerealms.footcube.utils;
 
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
 import org.bukkit.Server;

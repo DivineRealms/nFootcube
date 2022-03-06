@@ -8,12 +8,15 @@ import org.bukkit.entity.Slime;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
 public class PlayerInteractEntityListener implements Listener {
+  @Getter private final Plugin plugin;
   @Getter private final Physics physics;
 
-  public PlayerInteractEntityListener(final UtilManager utilManager) {
+  public PlayerInteractEntityListener(final Plugin plugin, final UtilManager utilManager) {
+    this.plugin = plugin;
     this.physics = utilManager.getPhysics();
   }
 
@@ -26,7 +29,7 @@ public class PlayerInteractEntityListener implements Listener {
 
     final Slime cube = (Slime) event.getRightClicked();
     cube.setVelocity(cube.getVelocity().add(new Vector(0, 0.7, 0)));
-    cube.getWorld().playSound(cube.getLocation(), getPhysics().getSoundMove(), 0.75F, 1F);
+    getPhysics().playSound(cube, false);
     getPhysics().getKicked().put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
     //TODO this.organization.ballTouch(event.getPlayer());
   }

@@ -2,39 +2,38 @@ package io.github.divinerealms.footcube.managers;
 
 import io.github.divinerealms.footcube.listeners.*;
 import lombok.Getter;
-import org.bukkit.Server;
+import lombok.Setter;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
 public class ListenerManager {
-  @Getter final Plugin plugin;
+  @Getter private final Plugin plugin;
+  @Getter private final PluginManager pluginManager;
   @Getter private final UtilManager utilManager;
-  @Getter private boolean registered = false;
+  @Getter @Setter private boolean registered = false;
 
   public ListenerManager(final Plugin plugin, final UtilManager utilManager) {
     this.plugin = plugin;
+    this.pluginManager = plugin.getServer().getPluginManager();
     this.utilManager = utilManager;
   }
 
   public void registerListeners() {
-    this.registered = true;
-
-    final Server server = getPlugin().getServer();
-    final PluginManager pluginManager = server.getPluginManager();
-
-    pluginManager.registerEvents(new ChunkUnloadListener(getUtilManager()), getPlugin());
-    pluginManager.registerEvents(new EntityDamageByEntityListener(getPlugin(), getUtilManager()), getPlugin());
-    pluginManager.registerEvents(new EntityDamageListener(), getPlugin());
-    pluginManager.registerEvents(new FoodLevelChangeListener(), getPlugin());
-    pluginManager.registerEvents(new PlayerInteractEntityListener(getUtilManager()), getPlugin());
-    pluginManager.registerEvents(new PlayerMoveListener(getUtilManager()), getPlugin());
-    pluginManager.registerEvents(new PlayerQuitListener(getUtilManager()), getPlugin());
-    pluginManager.registerEvents(new PlayerToggleSneakListener(getUtilManager()), getPlugin());
+    setRegistered(true);
+    getPluginManager().registerEvents(new ChunkUnloadListener(getUtilManager()), getPlugin());
+    getPluginManager().registerEvents(new EntityDamageByEntityListener(getPlugin(), getUtilManager()), getPlugin());
+    getPluginManager().registerEvents(new EntityDamageListener(), getPlugin());
+    getPluginManager().registerEvents(new FoodLevelChangeListener(), getPlugin());
+    getPluginManager().registerEvents(new PlayerInteractEntityListener(getPlugin(), getUtilManager()), getPlugin());
+    getPluginManager().registerEvents(new PlayerJoinListener(getPlugin()), getPlugin());
+    getPluginManager().registerEvents(new PlayerMoveListener(getUtilManager()), getPlugin());
+    getPluginManager().registerEvents(new PlayerQuitListener(getUtilManager()), getPlugin());
+    getPluginManager().registerEvents(new PlayerToggleSneakListener(getUtilManager()), getPlugin());
   }
 
   public void unregisterListeners() {
-    this.registered = false;
+    setRegistered(false);
     HandlerList.unregisterAll(getPlugin());
   }
 }

@@ -2,7 +2,7 @@ package io.github.divinerealms.footcube.commands;
 
 import io.github.divinerealms.footcube.Footcube;
 import io.github.divinerealms.footcube.managers.UtilManager;
-import io.github.divinerealms.footcube.utils.Messages;
+import io.github.divinerealms.footcube.configs.Messages;
 import lombok.Getter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

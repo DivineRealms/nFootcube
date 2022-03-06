@@ -15,7 +15,6 @@ public class Footcube extends JavaPlugin {
   public void onEnable() {
     setUtilManager(new UtilManager(this));
     setListenerManager(new ListenerManager(this, getUtilManager()));
-    saveDefaultConfig();
     getUtilManager().reloadUtils();
     getUtilManager().getLogger().sendBanner();
     getUtilManager().getLogger().info("Loading commands...");
@@ -30,8 +29,8 @@ public class Footcube extends JavaPlugin {
   }
 
   public void reload() {
-    getUtilManager().reloadUtils();
     shutdown();
+    getUtilManager().reloadUtils();
     setup();
   }
 

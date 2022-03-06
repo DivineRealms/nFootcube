@@ -52,7 +52,7 @@ cube:
   sounds:
     enabled: true
 
-    # Sound when moving the ball with the body and/or right clicking it.
+    # Sound when moving the ball with the body and/or right-clicking it.
     move: SLIME_WALK
 
     # Sound when kicking the ball.
