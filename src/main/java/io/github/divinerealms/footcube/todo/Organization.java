@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class Organization {
@@ -21,11 +22,16 @@ public class Organization {
   @Getter private final ArrayList<Slime> practiceCubes;
   @Getter private final HashMap<Player, Player> firstTeam, secondTeam;*/
   @Getter @Setter private static Economy econ = null;
+  @Getter @Setter private Matches[] matches1v1, matches2v2, matches3v3, matches4v4;
 
   public Organization(final Plugin plugin, final UtilManager utilManager) {
     this.plugin = plugin;
     this.logger = utilManager.getLogger();
     if (!setupEconomy()) getLogger().info("&cVault not found, plugin won't use economy.");
+    this.matches1v1 = new ArrayList<Player>().toArray(new Matches[0]);
+    this.matches2v2 = new ArrayList<Player>().toArray(new Matches[0]);
+    this.matches3v3 = new ArrayList<Player>().toArray(new Matches[0]);
+    this.matches4v4 = new ArrayList<Player>().toArray(new Matches[0]);
   }
 
   /*private void removeTeam(final Player player) {
@@ -43,7 +49,10 @@ public class Organization {
 
   private void addArena(final int type, final Location firstTeam, final Location secondTeam) {
     final Location center = firstTeam.add(firstTeam.subtract(secondTeam).multiply(0.5));
-
+    if (type == 1) {}
+    else if (type == 2) {}
+    else if (type == 3) {}
+    else if (type == 4) {}
   }
 
   private void loadArenas() {
