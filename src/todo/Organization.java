@@ -151,6 +151,7 @@ public class Organization implements Listener {
         }, 1L, 1L);
     }
 
+    // no need to touch, will move to command classes
     public void command(final CommandSender sender, final Command cmd, final String c, final String[] args) {
         this.disableCommands.command(sender, cmd, c, args);
         final Player p = (Player)sender;
@@ -568,11 +569,13 @@ public class Organization implements Listener {
         }
     }
 
+    // will move to PlayerJoinListener
     @EventHandler
     public void onJoin(final PlayerJoinEvent e) {
         final Player p = e.getPlayer();
         final String uuid = p.getUniqueId().toString();
         this.clearInventory(p);
+        // store should be removed
         if (!this.store.has(uuid)) {
             this.store.put(uuid, 0);
         }
@@ -582,9 +585,11 @@ public class Organization implements Listener {
         if (!this.bestWinStreak.has(uuid)) {
             this.bestWinStreak.put(uuid, 0);
         }
+        // no need for this as we store UUIDs by default here
         this.uuidConverter.put(p.getUniqueId().toString(), p.getName());
     }
 
+    // will move to PlayerQuitListener
     @EventHandler
     public void onQuit(final PlayerQuitEvent e) {
         final Player p = e.getPlayer();
@@ -776,6 +781,7 @@ public class Organization implements Listener {
         }
     }
 
+    // remove
     public int getStoreNumber(final Player p, final int digit) {
         final int storeContent = this.store.get(p.getUniqueId().toString());
         return (int)((storeContent % Math.pow(10.0, digit + 1) - storeContent % Math.pow(10.0, digit - 1)) / Math.pow(10.0, digit - 1));
@@ -800,6 +806,7 @@ public class Organization implements Listener {
         }
     }
 
+    // i dont even know what this does
     private Player[][] extendArray(final Player[][] oldL, final Player[] add) {
         final Player[][] newL = new Player[0][oldL.length + 1];
         for (int i = 0; i < oldL.length; ++i) {
@@ -809,6 +816,7 @@ public class Organization implements Listener {
         return newL;
     }
 
+    // i dont even know what this does
     private Player[][] reduceArray(final Player[][] oldL, final Player remove) {
         final Player[][] newL = new Player[0][oldL.length - 1];
         int i = 0;
@@ -823,6 +831,7 @@ public class Organization implements Listener {
         return newL;
     }
 
+    // i dont even know what this does
     private Match[] extendArray(final Match[] oldL, final Match add) {
         final Match[] newL = new Match[oldL.length + 1];
         for (int i = 0; i < oldL.length; ++i) {
@@ -832,6 +841,7 @@ public class Organization implements Listener {
         return newL;
     }
 
+    // i dont even know what this does
     private boolean[] extendArray(final boolean[] oldL, final boolean add) {
         final boolean[] newL = new boolean[oldL.length + 1];
         for (int i = 0; i < oldL.length; ++i) {
@@ -841,6 +851,7 @@ public class Organization implements Listener {
         return newL;
     }
 
+    // why? remove it
     private boolean isOnlinePlayer(final String s) {
         Collection<? extends Player> onlinePlayers;
         for (int length = (onlinePlayers = (Collection<? extends Player>)this.plugin.getServer().getOnlinePlayers()).size(), i = 0; i < length; ++i) {
@@ -904,6 +915,7 @@ public class Organization implements Listener {
         }
     }
 
+    // needs to simplify
     private void checkStats(final String uuid, final Player asker) {
         uuid.equals(asker.getUniqueId().toString());
         if (this.matches.has(uuid)) {
@@ -1074,6 +1086,7 @@ public class Organization implements Listener {
         }
     }
 
+    // should be moved to the main class
     private boolean setupEconomy() {
         final RegisteredServiceProvider<Economy> economyProvider = (RegisteredServiceProvider<Economy>)this.plugin.getServer().getServicesManager().getRegistration((Class)Economy.class);
         if (economyProvider != null) {
