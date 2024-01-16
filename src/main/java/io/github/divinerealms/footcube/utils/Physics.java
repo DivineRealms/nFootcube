@@ -1,15 +1,12 @@
 package io.github.divinerealms.footcube.utils;
 
-import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.configs.Config;
+import io.github.divinerealms.footcube.configs.Lang;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.*;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Slime;
+import org.bukkit.entity.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -17,27 +14,28 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
+@Getter
 public class Physics {
-  @Getter private final Plugin plugin;
-  @Getter private final Server server;
-  @Getter private final Messages messages;
-  @Getter private final Config config;
-  @Getter private final PotionEffect potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, -3, true);
-  @Getter private final HashMap<UUID, Vector> velocities = new HashMap<>();
-  @Getter private final HashMap<UUID, Long> kicked = new HashMap<>();
-  @Getter private final HashMap<UUID, Double> charges = new HashMap<>();
-  @Getter private final Map<UUID, Deque<Location>> lastLocations = new HashMap<>();
-  @Getter private final HashSet<Slime> cubes = new HashSet<>();
-  @Getter private double regularKickLimit, chargedKickLimit, kickPower, chargeRefillSpeed;
-  @Getter @Setter private double power = 0.4, charge = 0, total;
-  @Getter private Sound soundMove, soundKick;
-  @Getter private EntityEffect cubeEffect;
+  private final Plugin plugin;
+  private final Server server;
+  private final Config config;
+  private final Logger logger;
+  private final PotionEffect potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, -3, false);
+  private final HashMap<UUID, Vector> velocities = new HashMap<>();
+  private final HashMap<UUID, Long> kicked = new HashMap<>();
+  private final HashMap<UUID, Double> charges = new HashMap<>();
+  private final Map<UUID, Deque<Location>> lastLocations = new HashMap<>();
+  private final HashSet<Slime> cubes = new HashSet<>();
+  private double regularKickLimit, chargedKickLimit, kickPower, chargeRefillSpeed;
+  @Setter private double power = 0.4, charge = 0, total;
+  private Sound soundMove, soundKick;
+  private EntityEffect cubeEffect;
 
   public Physics(final Plugin plugin, final UtilManager utilManager) {
     this.plugin = plugin;
     this.server = plugin.getServer();
-    this.messages = utilManager.getMessages();
     this.config = utilManager.getConfig();
+    this.logger = utilManager.getLogger();
   }
 
   public void reload() {
@@ -69,9 +67,9 @@ public class Physics {
   }
 
   public double getTotalKickPower(final UUID playerID) {
-    setPower(0.4 + getLastMoveVector(playerID).length() * 2 + 0.4);
+    setPower(0.8 + getLastMoveVector(playerID).length());
     setCharge(getCharges().containsKey(playerID) ? getCharges().get(playerID) * 8 : 0);
-    setTotal(((getCharge() != 0) ? (getCharge() * Math.min(getPower(), getChargedKickLimit())) : Math.min(getPower(), getRegularKickLimit())) * getKickPower());
+    setTotal(((getCharge() != 0) ? (getCharge() * getPower() * getChargedKickLimit()) : (getPower() * getRegularKickLimit())) * getKickPower());
     return getTotal();
   }
 
@@ -89,7 +87,7 @@ public class Physics {
   }
 
   public void update() {
-    if (getKicked().size() > 0)
+    if (!getKicked().isEmpty())
       getKicked().entrySet().removeIf(entry -> System.currentTimeMillis() > getKicked().get(entry.getKey()) + 1000L);
 
     for (final UUID playerID : getCharges().keySet()) {
@@ -125,7 +123,6 @@ public class Physics {
             if (delta < 0.8 && newV.length() > 0.5) newV.multiply(0.5 / newV.length());
             double power = getLastMoveVector(player.getUniqueId()).length() / 3 + oldV.length() / 6;
             newV.add(player.getLocation().getDirection().setY(0).normalize().multiply(power));
-            //TODO: this.organization.ballTouch(p3);
             kicked = true;
             if (power > 0.15) sound = true;
           }
@@ -180,7 +177,7 @@ public class Physics {
       cube.setVelocity(newV);
       cube.addPotionEffect(getPotionEffect());
 
-      if (getConfig().isCubeEffectEnabled()) cube.playEffect(getCubeEffect());
+      if (getConfig().getBoolean("cube.effect.enabled")) cube.playEffect(getCubeEffect());
 
       getVelocities().put(cubeID, newV);
     }
@@ -192,12 +189,12 @@ public class Physics {
   }
 
   public void debug(final Player player) {
-    if (getConfig().isBallsHitsDebug())
-      getMessages().ballHitsDebug(player.getName(), format(getPower()), format(getCharge()), format(getKickPower()), format(getTotal()));
+    if (getConfig().getBoolean("debug.ball-hits"))
+      getLogger().send("fcfa", Lang.DEBUG_BALL_HITS.getConfigValue(new String[]{player.getName(), format(getPower()), format(getCharge()), format(getKickPower()), format(getTotal())}));
   }
 
   public void playSound(final Slime cube, final boolean isKick) {
-    if (getConfig().isSoundEnabled())
+    if (getConfig().getBoolean("cube.sounds.enabled"))
       cube.getWorld().playSound(cube.getLocation(), (isKick ? getSoundKick() : getSoundMove()), 0.75F, 1F);
   }
 }

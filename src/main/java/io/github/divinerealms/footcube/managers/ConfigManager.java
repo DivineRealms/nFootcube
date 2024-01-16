@@ -1,7 +1,6 @@
 package io.github.divinerealms.footcube.managers;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -10,45 +9,48 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
-@SuppressWarnings({"unused"})
 public class ConfigManager {
   @Getter private final Plugin plugin;
-  @Getter @Setter private File file;
-  @Getter @Setter private FileConfiguration configuration;
+  private final String folderName;
+  private FileConfiguration config;
+  private File configFile;
 
-  public ConfigManager(final Plugin plugin, final String name) {
+  public ConfigManager(final Plugin plugin, final String folderName) {
     this.plugin = plugin;
-    this.file = new File(plugin.getDataFolder(), name);
-    saveDefaultConfig(name);
+    this.folderName = folderName;
   }
 
-  public void reloadConfig(final String name) {
-    if (getFile() == null) setFile(new File(getPlugin().getDataFolder(), name));
-    setConfiguration(YamlConfiguration.loadConfiguration(getFile()));
+  public void createNewFile(final String name, final String message, final String header) {
+    reloadConfig(name);
+    saveConfig(name);
+    loadConfig(name, header);
+
+    if (message != null) getPlugin().getLogger().info(message);
   }
 
   public FileConfiguration getConfig(final String name) {
-    if (getConfiguration() == null) reloadConfig(name);
-    return getConfiguration();
+    if (config == null) reloadConfig(name);
+    return config;
   }
 
-  public void saveDefaultConfig(final String name) {
-    if (getFile() == null) setFile(new File(getPlugin().getDataFolder(), name));
-    if (!getFile().exists()) getPlugin().saveResource(name, false);
+  public void loadConfig(final String header, final String name) {
+    config.options().header(header);
+    config.options().copyDefaults(true);
+    saveConfig(name);
+  }
+
+  public void reloadConfig(final String name) {
+    if (configFile == null) configFile = new File(plugin.getDataFolder() + folderName, name);
+    config = YamlConfiguration.loadConfiguration(configFile);
   }
 
   public void saveConfig(final String name) {
-    try {
-      getConfig(name).save(getFile());
-    } catch (final IOException exception) {
-      getPlugin().getLogger().log(Level.SEVERE, "Could not save file to " + getFile(), exception);
-    }
-  }
+    if (config == null || configFile == null) return;
 
-  public static String getNotFound(final String path, final String file) {
-    return "&cString \"&e%path%&c\" in \"&4%file%&c\" not found!"
-        .replace("%path%", path)
-        .replace("%file%", file)
-        .replace('&', '\u00a7');
+    try {
+      getConfig(name).save(configFile);
+    } catch (final IOException exception) {
+      plugin.getLogger().log(Level.SEVERE, "Could not save config to " + configFile, exception);
+    }
   }
 }

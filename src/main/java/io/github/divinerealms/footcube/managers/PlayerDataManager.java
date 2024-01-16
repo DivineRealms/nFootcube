@@ -11,11 +11,11 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.logging.Level;
 
-@SuppressWarnings("unused")
+@Getter
 public class PlayerDataManager {
-  @Getter private final Plugin plugin;
-  @Getter @Setter private File file;
-  @Getter @Setter private FileConfiguration data;
+  private final Plugin plugin;
+  @Setter private File file;
+  @Setter private FileConfiguration data;
 
   public PlayerDataManager(final Plugin plugin, final UUID playerID) {
     this.plugin = plugin;

@@ -13,8 +13,9 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.UUID;
 
+@Getter
 public class PlayerMoveListener implements Listener {
-  @Getter private final Physics physics;
+  private final Physics physics;
 
   public PlayerMoveListener(final UtilManager utilManager) {
     this.physics = utilManager.getPhysics();

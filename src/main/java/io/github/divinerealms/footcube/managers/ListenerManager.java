@@ -7,11 +7,12 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
+@Getter
 public class ListenerManager {
-  @Getter private final Plugin plugin;
-  @Getter private final PluginManager pluginManager;
-  @Getter private final UtilManager utilManager;
-  @Getter @Setter private boolean registered = false;
+  private final Plugin plugin;
+  private final PluginManager pluginManager;
+  private final UtilManager utilManager;
+  @Setter private boolean registered = false;
 
   public ListenerManager(final Plugin plugin, final UtilManager utilManager) {
     this.plugin = plugin;

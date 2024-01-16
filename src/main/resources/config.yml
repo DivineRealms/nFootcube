@@ -63,7 +63,7 @@ cube:
   remove-distance: 100
 
   # How long should players wait between each ball spawn (in seconds)?
-  spawn-cooldown: 15
+  spawn-cooldown: 5
 
   # What should the ball hit cooldown be (in milliseconds)?
   kick-cooldown:
@@ -74,4 +74,4 @@ cube:
 # Toggle debug for more informations.
 # -------------------------------------------------------------------------------------------------
 debug:
-  ball-hits: true
+  ball-hits: false

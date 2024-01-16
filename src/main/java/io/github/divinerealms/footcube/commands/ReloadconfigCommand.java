@@ -1,35 +1,40 @@
 package io.github.divinerealms.footcube.commands;
 
+import io.github.divinerealms.footcube.Footcube;
 import io.github.divinerealms.footcube.configs.Config;
-import io.github.divinerealms.footcube.configs.Messages;
+import io.github.divinerealms.footcube.configs.Lang;
 import io.github.divinerealms.footcube.managers.UtilManager;
+import io.github.divinerealms.footcube.utils.Logger;
 import lombok.Getter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
+@Getter
 public class ReloadconfigCommand implements CommandExecutor {
-  @Getter private final UtilManager utilManager;
-  @Getter private final Config config;
-  @Getter private final Messages messages;
+  private final Footcube plugin;
+  private final UtilManager utilManager;
+  private final Logger logger;
+  private final Config config;
 
-  public ReloadconfigCommand(final UtilManager utilManager) {
+  public ReloadconfigCommand(final Footcube plugin, final UtilManager utilManager) {
+    this.plugin = plugin;
     this.utilManager = utilManager;
+    this.logger = utilManager.getLogger();
     this.config = utilManager.getConfig();
-    this.messages = utilManager.getMessages();
   }
 
   @Override
   public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
     if (!sender.hasPermission("nfootcube.reload")) {
-      getMessages().send((Player) sender, "insufficient-permission", "nfootcube.reload");
+      getLogger().send(sender, Lang.INSUFFICIENT_PERMISSION.getConfigValue(new String[]{"nfootcube.reload"}));
       return false;
     }
 
+    getPlugin().setupMessages();
     getConfig().reload();
-    getMessages().reload();
-    getMessages().send(sender, "reload.config");
+    getPlugin().setup();
+    getLogger().send(sender, Lang.RELOAD_CONFIG.getConfigValue(null));
     return true;
   }
 }

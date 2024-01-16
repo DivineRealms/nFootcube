@@ -11,9 +11,10 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
+@Getter
 public class PlayerInteractEntityListener implements Listener {
-  @Getter private final Plugin plugin;
-  @Getter private final Physics physics;
+  private final Plugin plugin;
+  private final Physics physics;
 
   public PlayerInteractEntityListener(final Plugin plugin, final UtilManager utilManager) {
     this.plugin = plugin;
@@ -28,7 +29,7 @@ public class PlayerInteractEntityListener implements Listener {
     if (event.getPlayer().getGameMode() != GameMode.SURVIVAL) return;
 
     final Slime cube = (Slime) event.getRightClicked();
-    cube.setVelocity(cube.getVelocity().add(new Vector(0, 0.7, 0)));
+    cube.setVelocity(cube.getVelocity().add(new Vector(0, 0.6, 0)));
     getPhysics().playSound(cube, false);
     getPhysics().getKicked().put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
     //TODO this.organization.ballTouch(event.getPlayer());

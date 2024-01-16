@@ -1,6 +1,5 @@
 package io.github.divinerealms.footcube.utils;
 
-import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.configs.Config;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
@@ -8,23 +7,20 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.UUID;
 
+@Getter
 public class Cooldown {
-  @Getter private final Messages messages;
-  @Getter private final Config config;
-  @Getter private final HashMap<UUID, Long> cooldowns = new HashMap<>();
-  @Getter private long cubeSpawnCooldown, cubeKickCooldown;
-  @Getter private String onCooldown;
-  @Getter private boolean isCubeKickCooldownEnabled;
+  private final Config config;
+  private final HashMap<UUID, Long> cooldowns = new HashMap<>();
+  private long cubeSpawnCooldown, cubeKickCooldown;
+  private boolean isCubeKickCooldownEnabled;
 
   public Cooldown(final UtilManager utilManager) {
-    this.messages = utilManager.getMessages();
     this.config = utilManager.getConfig();
   }
 
   public void reload() {
     this.cubeSpawnCooldown = getConfig().getInt("cube.spawn-cooldown");
     this.cubeKickCooldown = getConfig().getInt("cube.kick-cooldown.cooldown");
-    this.onCooldown = getMessages().getString("on-cooldown");
     this.isCubeKickCooldownEnabled = getConfig().getBoolean("cube.kick-cooldown.enabled");
   }
 
@@ -43,9 +39,5 @@ public class Cooldown {
 
   public long getTimeleftMillis(final UUID playerID, final Long cooldown) {
     return getCooldowns().containsKey(playerID) ? (getCooldown(playerID) + cooldown) - System.currentTimeMillis() : 0;
-  }
-
-  public String onCooldown(final Long timeleft) {
-    return getOnCooldown().replace("%timeleft%", String.valueOf(timeleft));
   }
 }

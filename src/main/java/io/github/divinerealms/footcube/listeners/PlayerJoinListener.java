@@ -10,10 +10,11 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.UUID;
 
+@Getter
 public class PlayerJoinListener implements Listener {
-  @Getter private final Plugin plugin;
-  @Getter @Setter private PlayerDataManager playerDataManager;
-  @Getter @Setter private UUID playerID;
+  private final Plugin plugin;
+  @Setter private PlayerDataManager playerDataManager;
+  @Setter private UUID playerID;
 
   public PlayerJoinListener(final Plugin plugin) {
     this.plugin = plugin;

@@ -7,8 +7,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+@Getter
 public class PlayerQuitListener implements Listener {
-  @Getter private final Physics physics;
+  private final Physics physics;
 
   public PlayerQuitListener(final UtilManager utilManager) {
     this.physics = utilManager.getPhysics();

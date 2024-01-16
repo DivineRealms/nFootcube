@@ -8,14 +8,14 @@ import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
-@SuppressWarnings("unused")
+@Getter
 public class Config extends ConfigManager {
-  @Getter private final String name = "config.yml";
-  @Getter @Setter private FileConfiguration config;
-  @Getter @Setter private boolean ballsHitsDebug, soundEnabled, cubeEffectEnabled;
+  private final String name = "config.yml";
+  @Setter private FileConfiguration config;
+  @Setter private boolean ballsHitsDebug, soundEnabled, cubeEffectEnabled;
 
   public Config(final Plugin plugin) {
-    super(plugin, "config.yml");
+    super(plugin, "");
   }
 
   public void reload() {
@@ -39,7 +39,7 @@ public class Config extends ConfigManager {
   }
 
   public String getString(final String path) {
-    return getConfig().getString(path, getNotFound(path, getName()));
+    return getConfig().getString(path, "Not Found");
   }
 
   public Sound getSound(final String path) {

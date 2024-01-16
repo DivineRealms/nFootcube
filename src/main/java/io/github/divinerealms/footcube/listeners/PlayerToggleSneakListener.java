@@ -9,8 +9,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
+@Getter
 public class PlayerToggleSneakListener implements Listener {
-  @Getter private final Physics physics;
+  private final Physics physics;
 
   public PlayerToggleSneakListener(final UtilManager utilManager) {
     this.physics = utilManager.getPhysics();

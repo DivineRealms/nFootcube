@@ -9,8 +9,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkUnloadEvent;
 
+@Getter
 public class ChunkUnloadListener implements Listener {
-  @Getter private final Physics physics;
+  private final Physics physics;
 
   public ChunkUnloadListener(final UtilManager utilManager) {
     this.physics = utilManager.getPhysics();

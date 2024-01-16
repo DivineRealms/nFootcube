@@ -9,6 +9,13 @@ softdepend:
   - Vault
   - PlaceholderAPI
 commands:
-  nfootcube:
+  footcube:
     description: Base command for Footcube.
-    aliases: [nfc]
+    aliases: [fc]
+  commandDisabler:
+    description: Base command for Command Disabler.
+    aliases: [cd]
+  cube:
+    description: Spawn cubes.
+  clearcube:
+    description: Clear nearest cube.
