@@ -28,8 +28,16 @@ public class PlayerDataManager {
     setData(YamlConfiguration.loadConfiguration(getFile()));
   }
 
+  public String getString(final String path) {
+    return getData().getString(path, "null");
+  }
+
   public int getInt(final String path) {
-    return getData().getInt(path);
+    return getData().getInt(path, 0);
+  }
+
+  public void setString(final String path, final String value) {
+    getData().set(path, value);
   }
 
   public void setInt(final String path, final int value) {

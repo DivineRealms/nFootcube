@@ -31,7 +31,7 @@ public class ReloadconfigCommand implements CommandExecutor {
       return false;
     }
 
-    getPlugin().setupMessages();
+    getPlugin().setupConfigs();
     getConfig().reload();
     getPlugin().setup();
     getLogger().send(sender, Lang.RELOAD_CONFIG.getConfigValue(null));

@@ -19,6 +19,7 @@ public enum Lang {
   CUBE_CLEARED("cube.cleared", "&a▎ &fLopta obrisana."),
   CUBE_UNABLE("cube.unable", "&4▎ &cNema lopti u blizini."),
   TOO_MANY_CUBES("cube.too-many", "&4▎ &cNe možete stvoriti više od 5 lopti u radiusu od 100 blokova."),
+  CREATED_PLAYER_DATA("created-playerdata", "&a▎ &fNapravljen userdata file za igrača &b{0}&f."),
   COMMAND_DISABLER_HELP("command-disabler.help", String.join(System.lineSeparator(),
       "&9&m═══════════════════════════════════&r",
       "&r &r",

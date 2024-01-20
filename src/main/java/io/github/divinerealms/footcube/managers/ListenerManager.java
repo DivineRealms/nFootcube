@@ -27,7 +27,7 @@ public class ListenerManager {
     getPluginManager().registerEvents(new EntityDamageListener(), getPlugin());
     getPluginManager().registerEvents(new FoodLevelChangeListener(), getPlugin());
     getPluginManager().registerEvents(new PlayerInteractEntityListener(getPlugin(), getUtilManager()), getPlugin());
-    getPluginManager().registerEvents(new PlayerJoinListener(getPlugin()), getPlugin());
+    getPluginManager().registerEvents(new PlayerJoinListener(getPlugin(), getUtilManager()), getPlugin());
     getPluginManager().registerEvents(new PlayerMoveListener(getUtilManager()), getPlugin());
     getPluginManager().registerEvents(new PlayerQuitListener(getUtilManager()), getPlugin());
     getPluginManager().registerEvents(new PlayerToggleSneakListener(getUtilManager()), getPlugin());

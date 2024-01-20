@@ -4,6 +4,7 @@ import io.github.divinerealms.footcube.commands.BaseCommand;
 import io.github.divinerealms.footcube.commands.ClearCubeCommand;
 import io.github.divinerealms.footcube.commands.CommandDisabler;
 import io.github.divinerealms.footcube.commands.CubeCommand;
+import io.github.divinerealms.footcube.configs.Config;
 import io.github.divinerealms.footcube.configs.Lang;
 import io.github.divinerealms.footcube.managers.ConfigManager;
 import io.github.divinerealms.footcube.managers.ListenerManager;
@@ -14,13 +15,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 @Setter @Getter
 public class Footcube extends JavaPlugin {
-  private final ConfigManager messagesFile = new ConfigManager(this, "");
+  private final ConfigManager configManager = new ConfigManager(this, "");
   private UtilManager utilManager;
   private ListenerManager listenerManager;
 
   @Override
   public void onEnable() {
-    setupMessages();
+    saveDefaultConfig();
+    setupConfigs();
     setUtilManager(new UtilManager(this));
     setListenerManager(new ListenerManager(this, getUtilManager()));
     getUtilManager().reloadUtils();
@@ -54,11 +56,6 @@ public class Footcube extends JavaPlugin {
     getServer().getScheduler().runTaskTimer(this, getUtilManager().getPhysics()::update, 20L, 1L);
   }
 
-  public void setupMessages() {
-    getMessagesFile().createNewFile("messages.yml", "Loading messages.yml", "Footcube Messages");
-    loadMessages();
-  }
-
   private void shutdown() {
     getUtilManager().getPhysics().removeCubes();
     getServer().getScheduler().cancelTasks(this);
@@ -66,14 +63,24 @@ public class Footcube extends JavaPlugin {
     getListenerManager().unregisterListeners();
   }
 
-  private void loadMessages() {
-    Lang.setFile(getMessagesFile().getConfig("messages.yml"));
+  public void setupConfigs() {
+    getConfigManager().createNewFile("messages.yml", "Loading messages.yml", "Footcube Messages");
+    getConfigManager().createNewFile("config.yml", "Loading config.yml", "Footcube Configuration");
+    loadConfigs();
+  }
+
+  private void loadConfigs() {
+    Lang.setFile(getConfigManager().getConfig("messages.yml"));
+    Config.setFile(getConfigManager().getConfig("config.yml"));
 
     for (final Lang value : Lang.values())
-      getMessagesFile().getConfig("messages.yml").addDefault(value.getPath(), value.getDefault());
+      getConfigManager().getConfig("messages.yml").addDefault(value.getPath(), value.getDefault());
 
-    getMessagesFile().getConfig("messages.yml").options().copyDefaults(true);
-    getMessagesFile().saveConfig("messages.yml");
+    getConfigManager().getConfig("config.yml").options().copyDefaults(true);
+    getConfigManager().saveConfig("config.yml");
+
+    getConfigManager().getConfig("messages.yml").options().copyDefaults(true);
+    getConfigManager().saveConfig("messages.yml");
   }
 }
 

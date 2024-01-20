@@ -21,8 +21,8 @@ public class ReloadCommand implements CommandExecutor {
 
   @Override
   public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-    if (!sender.hasPermission("nfootcube.reload")) {
-      getLogger().send(sender, Lang.INSUFFICIENT_PERMISSION.getConfigValue(new String[]{"nfootcube.reload"}));
+    if (!sender.hasPermission("footcube.reload")) {
+      getLogger().send(sender, Lang.INSUFFICIENT_PERMISSION.getConfigValue(new String[]{"footcube.reload"}));
       return false;
     }
 

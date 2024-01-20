@@ -1,28 +1,33 @@
 package io.github.divinerealms.footcube.listeners;
 
+import io.github.divinerealms.footcube.configs.Lang;
 import io.github.divinerealms.footcube.managers.PlayerDataManager;
+import io.github.divinerealms.footcube.managers.UtilManager;
+import io.github.divinerealms.footcube.utils.Logger;
 import lombok.Getter;
-import lombok.Setter;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 
-import java.util.UUID;
-
 @Getter
 public class PlayerJoinListener implements Listener {
   private final Plugin plugin;
-  @Setter private PlayerDataManager playerDataManager;
-  @Setter private UUID playerID;
+  private final Logger logger;
 
-  public PlayerJoinListener(final Plugin plugin) {
+  public PlayerJoinListener(final Plugin plugin, final UtilManager utilManager) {
     this.plugin = plugin;
+    this.logger = utilManager.getLogger();
   }
 
   @EventHandler
   public void onPlayerJoin(final PlayerJoinEvent playerJoinEvent) {
-    setPlayerID(playerJoinEvent.getPlayer().getUniqueId());
-    setPlayerDataManager(new PlayerDataManager(getPlugin(), getPlayerID()));
+    final Player player = playerJoinEvent.getPlayer();
+    PlayerDataManager playerData = new PlayerDataManager(getPlugin(), player.getUniqueId());
+    if (playerData.getFile().exists()) return;
+    playerData.setString("player-name", player.getName());
+    playerData.savePlayerData(player.getUniqueId());
+    getLogger().send("helper", Lang.CREATED_PLAYER_DATA.getConfigValue(new String[]{player.getName()}));
   }
 }

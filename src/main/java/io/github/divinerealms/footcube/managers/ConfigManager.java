@@ -49,7 +49,7 @@ public class ConfigManager {
 
     try {
       getConfig(name).save(configFile);
-    } catch (final IOException exception) {
+    } catch (final IOException | IllegalArgumentException exception ) {
       plugin.getLogger().log(Level.SEVERE, "Could not save config to " + configFile, exception);
     }
   }
