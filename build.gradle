@@ -10,6 +10,7 @@ repositories {
     maven { url = "https://papermc.io/repo/repository/maven-public/" }
     maven { url = "https://jitpack.io" }
     maven { url = "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
+
 }
 
 dependencies {
@@ -18,7 +19,33 @@ dependencies {
     compileOnly "org.github.paperspigot:paperspigot-api:1.8.8-R0.1-SNAPSHOT"
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
     compileOnly "me.clip:placeholderapi:2.11.1"
-    compileOnly 'org.projectlombok:lombok:1.18.22'
+    compileOnly "org.projectlombok:lombok:1.18.22"
+    compileOnly "com.github.ConnorLinfoot:TitleAPI:1.8.1"
+    compileOnly "org.imgscalr:imgscalr-lib:4.2"
+    compileOnly "xyz.xenondevs:particle:1.8.4"
+
+    implementation("com.github.megavexnetwork.scoreboard-library:scoreboard-library-api:2.0.0-RC11")
+    runtimeOnly("com.github.megavexnetwork.scoreboard-library:scoreboard-library-implementation:2.0.0-RC11")
+    implementation("com.github.megavexnetwork.scoreboard-library:scoreboard-library-extra-kotlin:2.0.0-RC11") // If using Kotlin
+
+    // Add packet adapter implementations you want:
+    runtimeOnly("com.github.megavexnetwork.scoreboard-library:scoreboard-library-modern:2.0.0-RC11") // 1.17+
+    runtimeOnly("com.github.megavexnetwork.scoreboard-library:scoreboard-library-packetevents:2.0.0-RC11") // 1.8+
+    runtimeOnly("com.github.megavexnetwork.scoreboard-library:scoreboard-library-v1_8_R3:2.0.0-RC11") // 1.8
+
+    // If using the PacketEvents implementation, scoreboard-library expects PacketEvents to be in the classpath.
+    // Follow either of:
+    // - https://github.com/retrooper/packetevents/wiki/Depending-on-pre%E2%80%90built-PacketEvents
+    // - https://github.com/retrooper/packetevents/wiki/Shading-PacketEvents
+    // Example how to load PacketEvents in your plugin:
+    // https://github.com/retrooper/packetevents-example/blob/24f0c842d47362aef122b794dea29b8fee113fa3/thread-safe-listener/src/main/java/main/Main.java
+
+    // If using the 1.8 version implementation, add Adventure as well:
+    implementation("net.kyori:adventure-platform-bukkit:4.0.1")
+
+    implementation 'org.slf4j:slf4j-log4j1:1.7.29'
+    implementation files('libs/spigot-1.8.8-R0.1-SNAPSHOT-latest.jar')
+
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
     testCompileOnly 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'

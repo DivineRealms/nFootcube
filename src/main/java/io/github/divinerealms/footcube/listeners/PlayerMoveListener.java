@@ -23,10 +23,23 @@ public class PlayerMoveListener implements Listener {
 
   @EventHandler
   public void onMove(final PlayerMoveEvent event) {
-    if (event.getPlayer().getGameMode() != GameMode.SURVIVAL) return;
+    // Check if the player is in survival mode
+    if (event.getPlayer().getGameMode() != GameMode.SURVIVAL) {
+      return;
+    }
+
+    // Get the unique ID of the player
     final UUID playerID = event.getPlayer().getUniqueId();
+
+    // Retrieve or create a deque of player locations
     final Deque<Location> locations = getPhysics().getLastLocations().computeIfAbsent(playerID, key -> new ArrayDeque<>());
-    if (locations.size() == 2) locations.poll();
+
+    // Limit the deque size to 2
+    if (locations.size() == 2) {
+      locations.poll();
+    }
+
+    // Add the current player location to the deque
     locations.add(event.getTo());
   }
 }

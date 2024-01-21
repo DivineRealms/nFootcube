@@ -9,12 +9,18 @@ import org.bukkit.plugin.Plugin;
 
 @Getter
 public class UtilManager {
+
   private final Plugin plugin;
   private final Config config;
   private final Cooldown cooldown;
   private final Logger logger;
   private final Physics physics;
 
+  /**
+   * Constructs a new UtilManager instance.
+   *
+   * @param plugin The main plugin instance.
+   */
   public UtilManager(final Plugin plugin) {
     this.plugin = plugin;
     this.config = new Config(plugin);
@@ -23,6 +29,9 @@ public class UtilManager {
     this.physics = new Physics(plugin, this);
   }
 
+  /**
+   * Reloads all utility components managed by UtilManager.
+   */
   public void reloadUtils() {
     getConfig().reload();
     getCooldown().reload();

@@ -2,7 +2,7 @@ reload:
   usage: '&6▎ &eUpozorenje: obrisaćete sve lopte ovom komandom! Ako se slažete kucajte &6/&enfc reload confirm&c.'
   plugin: '&a▎ &fPlugin uspešno osvežen!'
   config: '&a▎ &fPoruke plugina uspešno osvežene!'
-unknown-command: '&4▎ &cNepoznata komanda.'
+unknown-command: '&4▎ &cNepoznata komanda ({0}).'
 insufficient-permission: '&4▎ &cNemate dozvolu za to ({0}).'
 ingame-only: '&4▎ &cOva komanda se može koristiti samo u igri.'
 on-cooldown: '&4▎ &cProbajte ovu komandu ponovo za {0} sekundi.'
@@ -35,3 +35,17 @@ command-disabler:
     - '&6 /&efc cd remove &2<&akomanda&2>'
     - '&r &r'
     - '&9&m═══════════════════════════════════&r'
+match:
+  joinRedTeam: '&a▎ &fUšli ste u igru, sada ste u &cCrvenom &ftimu.'
+  joinBlueTeam: '&a▎ &fUšli ste u igru, sada ste u &9Plavom &ftimu.'
+  matchStart: |-
+    &b▎ &f
+    &b▎ &fMeč počinje za &e15 sekundi&f. Koristite &2/&atc &fza tim čet.
+    &b▎ &fImate vremena da se dogovorite oko pozicija. Izaberite GK.
+    &b▎ &f
+    &b▎ &cZabranjeno je biti AFK, utakmica može trajati i do &e5 minuta&b.
+    &b▎ &cNemojte paliti fly, menjati gamemode i uopšte abjuzati.
+    &b▎ &f
+  tc_red: "&8▎ &c&lTC &8┃ &b{0}&f: &c{1}"
+  tc_blue: "&8▎ &9&lTC &8┃ &b{0}&f: &b{1}"
+  team_with: "&8▎ &fU timu ste sa &b{0}&f."

@@ -19,18 +19,34 @@ public class ReloadCommand implements CommandExecutor {
     this.logger = utilManager.getLogger();
   }
 
+  /**
+   * Handles the /footcube reload command, allowing the plugin to be reloaded.
+   *
+   * @param sender  Command sender
+   * @param command Command object
+   * @param label   Command label
+   * @param args    Command arguments
+   * @return True if the command was handled successfully
+   */
   @Override
   public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+    // Check if the sender has the necessary permission
     if (!sender.hasPermission("footcube.reload")) {
-      getLogger().send(sender, Lang.INSUFFICIENT_PERMISSION.getConfigValue(new String[]{"footcube.reload"}));
+      getLogger().send(sender, Lang.INSUFFICIENT_PERMISSION.getMessage(new String[]{"footcube.reload"}));
       return false;
     }
 
-    if (args.length < 2) getLogger().send(sender, Lang.RELOAD_USAGE.getConfigValue(null));
-    else if (args[1].equalsIgnoreCase("confirm")) {
+    // Check the number of arguments provided
+    if (args.length < 2) {
+      getLogger().send(sender, Lang.RELOAD_USAGE.getMessage(null));
+    } else if (args[1].equalsIgnoreCase("confirm")) {
+      // Reload the plugin
       getPlugin().reload();
-      getLogger().send(sender, Lang.RELOAD_PLUGIN.getConfigValue(null));
-    } else getLogger().send(sender, Lang.UNKNOWN_COMMAND.getConfigValue(null));
+      getLogger().send(sender, Lang.RELOAD_PLUGIN.getMessage(null));
+    } else {
+      // Unknown command
+      getLogger().send(sender, Lang.UNKNOWN_COMMAND.getMessage(null));
+    }
     return true;
   }
 }

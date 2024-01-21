@@ -26,25 +26,47 @@ public class ClearCubeCommand implements CommandExecutor {
     this.physics = utilManager.getPhysics();
   }
 
+  /**
+   * Handles the /clearcube command to remove nearby cubes.
+   *
+   * @param sender  Command sender
+   * @param command Command object
+   * @param label   Command label
+   * @param args    Command arguments
+   * @return True if the command was handled successfully
+   */
   @Override
   public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-    if (!(sender instanceof Player)) getLogger().send(sender, Lang.INGAME_ONLY.getConfigValue(null));
-    else {
+    if (!(sender instanceof Player)) {
+      // Command can only be used by players
+      getLogger().send(sender, Lang.INGAME_ONLY.getMessage(null));
+    } else {
       final Player player = (Player) sender;
-      if (!player.hasPermission("nfootcube.clearcube"))
-        getLogger().send(player, Lang.INSUFFICIENT_PERMISSION.getConfigValue(new String[]{"nfootcube.clearcube"}));
-      else {
-        if (getPhysics().getCubes().isEmpty()) getLogger().send(player, Lang.CUBE_UNABLE.getConfigValue(null));
-        else {
+
+      if (!player.hasPermission("nfootcube.clearcube")) {
+        // Player doesn't have permission
+        getLogger().send(player, Lang.INSUFFICIENT_PERMISSION.getMessage(new String[]{"nfootcube.clearcube"}));
+      } else {
+        if (getPhysics().getCubes().isEmpty()) {
+          // No cubes to clear
+          getLogger().send(player, Lang.CUBE_UNABLE.getMessage(null));
+        } else {
+          // Iterate through cubes and remove nearby ones
           for (final Slime cube : getPhysics().getCubes()) {
             final boolean isCubeClose = cube.getLocation().distance(player.getLocation()) <= getDistance();
-            if (!isCubeClose) getLogger().send(player, Lang.CUBE_UNABLE.getConfigValue(null));
-            else {
+
+            if (isCubeClose) {
+              // Remove the cube
               cube.remove();
               getPhysics().getCubes().remove(cube);
-              getLogger().send(player, Lang.CUBE_CLEARED.getConfigValue(null));
+              getLogger().send(player, Lang.CUBE_CLEARED.getMessage(null));
+              break;  // Stop after clearing the first cube
             }
-            break;
+          }
+
+          if (!getPhysics().getCubes().isEmpty()) {
+            // No cubes were close to the player
+            getLogger().send(player, Lang.CUBE_UNABLE.getMessage(null));
           }
         }
       }

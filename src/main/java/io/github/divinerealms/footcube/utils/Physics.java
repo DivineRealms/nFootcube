@@ -23,15 +23,25 @@ public class Physics {
   private final Server server;
   private final Config config;
   private final Logger logger;
-  private final PotionEffect potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, -3, false);
-  private final HashMap<UUID, Vector> velocities = new HashMap<>();
-  private final HashMap<UUID, Long> kicked = new HashMap<>();
-  private final HashMap<UUID, Double> charges = new HashMap<>();
-  private final Map<UUID, Deque<Location>> lastLocations = new HashMap<>();
-  private final HashSet<Slime> cubes = new HashSet<>();
-  private double regularKickLimit, chargedKickLimit, kickPower, chargeRefillSpeed;
-  @Setter private double power = 0.4, charge = 0, total;
-  private Sound soundMove, soundKick;
+
+  private final double regularKickLimit;
+  private final double chargedKickLimit;
+  private final double kickPower;
+  private final double chargeRefillSpeed;
+
+  private final PotionEffect potionEffect;
+  private final Map<UUID, Vector> velocities;
+  private final Map<UUID, Long> kicked;
+  private final Map<UUID, Double> charges;
+  private final Map<UUID, Deque<Location>> lastLocations;
+  private final Set<Slime> cubes;
+
+  @Setter private double power;
+  @Setter private double charge;
+  @Setter private double total;
+
+  private Sound soundMove;
+  private Sound soundKick;
   private EntityEffect cubeEffect;
 
   public Physics(final Plugin plugin, final UtilManager utilManager) {
@@ -39,13 +49,28 @@ public class Physics {
     this.server = plugin.getServer();
     this.config = utilManager.getConfig();
     this.logger = utilManager.getLogger();
+
+    // Load constants from config
+    this.regularKickLimit = getConfig().getDouble("cube.power-limit.regular-kick");
+    this.chargedKickLimit = getConfig().getDouble("cube.power-limit.charged-kick");
+    this.kickPower = getConfig().getDouble("cube.kick-power");
+    this.chargeRefillSpeed = getConfig().getDouble("cube.power-limit.charge-refill");
+
+    this.potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, -3, false);
+    this.velocities = new HashMap<>();
+    this.kicked = new HashMap<>();
+    this.charges = new HashMap<>();
+    this.lastLocations = new HashMap<>();
+    this.cubes = new HashSet<>();
+
+    // Initial values for setters
+    this.power = 0.4;
+    this.charge = 0;
+    this.total = 0;
   }
 
+  // Reload constants from config
   public void reload() {
-    this.kickPower = getConfig().getDouble("cube.kick-power");
-    this.chargedKickLimit = getConfig().getDouble("cube.power-limit.charged-kick");
-    this.regularKickLimit = getConfig().getDouble("cube.power-limit.regular-kick");
-    this.chargeRefillSpeed = getConfig().getDouble("cube.power-limit.charge-refill");
     this.soundMove = getConfig().getSound("cube.sounds.move");
     this.soundKick = getConfig().getSound("cube.sounds.kick");
     this.cubeEffect = getConfig().getEntityEffect("cube.effect.type");
@@ -62,7 +87,7 @@ public class Physics {
     if (locations == null) return defaultLocation;
     final Location last = locations.poll();
     final Location secondLast = locations.poll();
-    if (last == null | secondLast == null) return defaultLocation;
+    if (last == null || secondLast == null) return defaultLocation;
     final Vector vector = last.toVector().subtract(secondLast.toVector());
     locations.add(last);
     locations.add(secondLast);
@@ -72,28 +97,34 @@ public class Physics {
   public double getTotalKickPower(final UUID playerID) {
     setPower(0.8 + getLastMoveVector(playerID).length());
     setCharge(getCharges().containsKey(playerID) ? getCharges().get(playerID) * 8 : 0);
-    setTotal(((getCharge() != 0) ? (getCharge() * getPower() * getChargedKickLimit()) : (getPower() * getRegularKickLimit())) * getKickPower());
+    setTotal(((getCharge() != 0) ? (getCharge() * getPower() * getChargedKickLimit())
+        : (getPower() * getRegularKickLimit())) * getKickPower());
     return getTotal();
   }
 
-  public void spawnCube(final Location location) {
+  // Spawn a cube at the given location
+  public Slime spawnCube(final Location location) {
     final Slime cube = (Slime) location.getWorld().spawnEntity(location, EntityType.SLIME);
     cube.setRemoveWhenFarAway(false);
     cube.setSize(1);
     getCubes().add(cube);
+    return cube;
   }
 
+  // Get the distance between two locations
   public Location getDistance(final Location firstLocation, final Location secondLocation) {
     firstLocation.add(0, -1, 0);
     firstLocation.subtract(secondLocation).add(0, -1.5, 0);
     return firstLocation;
   }
 
+  // Update method for physics calculations
   public void update() {
     if (!getKicked().isEmpty())
       getKicked().entrySet().removeIf(entry -> System.currentTimeMillis() > getKicked().get(entry.getKey()) + 1000L);
 
-    for (final UUID playerID : getCharges().keySet()) {
+    for (Map.Entry<UUID, Double> entry : getCharges().entrySet()) {
+      final UUID playerID = entry.getKey();
       final Player player = getServer().getPlayer(playerID);
       final double charge = getCharges().get(playerID);
       final double nextCharge = 1 - (1 - charge) * getChargeRefillSpeed();
@@ -101,14 +132,11 @@ public class Physics {
       player.setExp((float) nextCharge);
     }
 
-    final Iterator<Slime> cubesIterator = getCubes().iterator();
-
-    while (cubesIterator.hasNext()) {
-      final Slime cube = cubesIterator.next();
+    for (Slime cube : getCubes()) {
       final UUID cubeID = cube.getUniqueId();
       Vector oldV = cube.getVelocity();
       if (getVelocities().containsKey(cubeID)) oldV = getVelocities().get(cubeID);
-      if (cube.isDead()) cubesIterator.remove();
+      if (cube.isDead()) cube.remove();
 
       boolean sound = false;
       boolean kicked = false;
@@ -186,18 +214,30 @@ public class Physics {
     }
   }
 
+  // Remove all cube entities from the world
   public void removeCubes() {
+    // Remove all slime entities from the world
     final List<Entity> entities = getServer().getWorlds().get(0).getEntities();
-    for (final Entity entity : entities) if (entity instanceof Slime) entity.remove();
+    for (final Entity entity : entities) {
+      if (entity instanceof Slime) {
+        entity.remove();
+      }
+    }
   }
 
+  // Debug method to display information to a player
   public void debug(final Player player) {
-    if (getConfig().getBoolean("debug.ball-hits"))
-      getLogger().send("fcfa", Lang.DEBUG_BALL_HITS.getConfigValue(new String[]{player.getName(), format(getPower()), format(getCharge()), format(getKickPower()), format(getTotal())}));
+    if (getConfig().getBoolean("debug.ball-hits")) {
+      getLogger().send("fcfa", Lang.DEBUG_BALL_HITS.getMessage(
+          new String[]{player.getName(), format(getPower()), format(getCharge()),
+              format(getKickPower()), format(getTotal())}));
+    }
   }
 
+  // Play sound based on the action (kick or move) of a cube
   public void playSound(final Slime cube, final boolean isKick) {
-    if (getConfig().getBoolean("cube.sounds.enabled"))
+    if (getConfig().getBoolean("cube.sounds.enabled")) {
       cube.getWorld().playSound(cube.getLocation(), (isKick ? getSoundKick() : getSoundMove()), 0.75F, 1F);
+    }
   }
 }

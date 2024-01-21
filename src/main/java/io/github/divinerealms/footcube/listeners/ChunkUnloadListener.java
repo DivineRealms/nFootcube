@@ -17,13 +17,29 @@ public class ChunkUnloadListener implements Listener {
     this.physics = utilManager.getPhysics();
   }
 
+  /**
+   * Handles the chunk unload event.
+   *
+   * @param event The ChunkUnloadEvent.
+   */
   @EventHandler
   public void onUnloadChunk(final ChunkUnloadEvent event) {
-    final Entity[] entities;
-    for (int length = (entities = event.getChunk().getEntities()).length, i = 0; i < length; ++i) {
-      final Entity entity = entities[i];
-      if (!(entity instanceof Slime)) return;
-      if (!getPhysics().getCubes().contains(entity)) return;
+    // Get all entities in the chunk
+    final Entity[] entities = event.getChunk().getEntities();
+
+    // Iterate through each entity in the chunk
+    for (final Entity entity : entities) {
+      // Check if the entity is a Slime
+      if (!(entity instanceof Slime)) {
+        return; // Skip to the next entity if it's not a Slime
+      }
+
+      // Check if the Slime is part of the cubes set
+      if (!getPhysics().getCubes().contains(entity)) {
+        return; // Skip to the next entity if it's not part of the cubes set
+      }
+
+      // Remove the Slime from the cubes set and remove it from the world
       getPhysics().getCubes().remove((Slime) entity);
       entity.remove();
     }

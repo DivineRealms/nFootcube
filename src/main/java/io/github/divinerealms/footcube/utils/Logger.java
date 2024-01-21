@@ -5,19 +5,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 public class Logger {
   private final Server server;
   private final PluginDescriptionFile description;
-  private final List<String> banner = new ArrayList<>();
   private final ConsoleCommandSender consoleSender;
 
   public Logger(final Plugin plugin) {
@@ -26,32 +20,48 @@ public class Logger {
     this.consoleSender = server.getConsoleSender();
   }
 
+  /**
+   * Sends a colored message to a command sender.
+   *
+   * @param sender  The command sender.
+   * @param message The message to send.
+   */
   public void send(final CommandSender sender, final String message) {
-    if (sender instanceof Player) sender.sendMessage(message);
-    else getConsoleSender().sendMessage(message);
+    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
   }
 
+  /**
+   * Sends a colored message to all players in a specific rank group.
+   *
+   * @param rank    The rank group.
+   * @param message The message to send.
+   */
   public void send(final String rank, final String message) {
-    getServer().broadcast(message, "group." + rank);
-    getConsoleSender().sendMessage(message);
+    server.broadcast(message, "group." + rank);
+    consoleSender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
   }
 
+  /**
+   * Sends a banner with plugin information to the console.
+   */
   public void sendBanner() {
-    final List<String> authors = getDescription().getAuthors();
-    final String formattedAuthors = authors.stream().map(String::valueOf).collect(Collectors.joining(", "));
-    final String pluginName = getDescription().getFullName();
-    final String serverName = getServer().getName();
-    final String version = getServer().getBukkitVersion();
-    final String serverNameVersion = serverName + " - " + version;
+    String banner = generateBanner();
+    consoleSender.sendMessage(banner);
+  }
 
-    getBanner().add("&9     __");
-    getBanner().add("&3  .&9'&f\".'\"&9'&3.   &2" + pluginName);
-    getBanner().add("&b :.&f_.\"\"._&b.:  &5Authors: &d" + formattedAuthors);
-    getBanner().add("&3 :  &f\\__/&3  :");
-    getBanner().add("&b  '.&f/  \\&b.'   &8Running on " + serverNameVersion);
-    getBanner().add("&9     \"\"");
-
-    for (final String message : getBanner())
-      getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+  /**
+   * Generates a banner with plugin information.
+   *
+   * @return The generated banner string.
+   */
+  private String generateBanner() {
+    return ChatColor.BLUE + "     __\n" +
+        ChatColor.AQUA + "  .'" + ChatColor.BLUE + "\".'\"'." + ChatColor.AQUA + ".'   " + ChatColor.DARK_GREEN + description.getFullName() + "\n" +
+        ChatColor.GOLD + " :." + ChatColor.AQUA + "_.\"\"._" + ChatColor.GOLD + ".:  " + ChatColor.LIGHT_PURPLE + "Authors: " + ChatColor.DARK_PURPLE +
+        String.join(", ", description.getAuthors()) + "\n" +
+        ChatColor.BLUE + " :  " + ChatColor.AQUA + "\\__/" + ChatColor.BLUE + "  :\n" +
+        ChatColor.GOLD + "  '.'/  \\" + ChatColor.GOLD + ".'   " + ChatColor.DARK_GRAY +
+        "Running on " + server.getName() + " - " + server.getBukkitVersion() + "\n" +
+        ChatColor.BLUE + "     \"\"";
   }
 }

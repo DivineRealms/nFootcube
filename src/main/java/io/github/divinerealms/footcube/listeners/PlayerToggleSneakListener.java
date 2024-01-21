@@ -20,9 +20,15 @@ public class PlayerToggleSneakListener implements Listener {
   @EventHandler
   public void onSneak(final PlayerToggleSneakEvent event) {
     final Player player = event.getPlayer();
+
+    // Ignore if not in survival mode
     if (player.getGameMode() != GameMode.SURVIVAL) return;
-    if (event.isSneaking()) getPhysics().getCharges().put(player.getUniqueId(), 0d);
-    else {
+
+    if (event.isSneaking()) {
+      // Start charging when player starts sneaking
+      getPhysics().getCharges().put(player.getUniqueId(), 0d);
+    } else {
+      // Reset charge and player exp when player stops sneaking
       player.setExp(0);
       getPhysics().getCharges().remove(player.getUniqueId());
     }

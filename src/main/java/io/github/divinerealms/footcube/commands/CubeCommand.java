@@ -29,29 +29,59 @@ public class CubeCommand implements CommandExecutor {
     this.physics = utilManager.getPhysics();
   }
 
+  /**
+   * Handles the /cube command to spawn a cube.
+   *
+   * @param sender  Command sender
+   * @param command Command object
+   * @param label   Command label
+   * @param args    Command arguments
+   * @return True if the command was handled successfully
+   */
   @Override
   public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-    if (!(sender instanceof Player)) getLogger().send(sender, Lang.INGAME_ONLY.getConfigValue(null));
-    else {
+    if (!(sender instanceof Player)) {
+      // Command can only be used by players
+      getLogger().send(sender, Lang.INGAME_ONLY.getMessage(null));
+    } else {
       final Player player = (Player) sender;
-      if (!player.hasPermission("footcube.cube")) getLogger().send(player, Lang.INSUFFICIENT_PERMISSION.getConfigValue(new String[]{"footcube.cube"}));
-      else {
+
+      if (!player.hasPermission("footcube.cube")) {
+        // Player doesn't have permission
+        getLogger().send(player, Lang.INSUFFICIENT_PERMISSION.getMessage(new String[]{"footcube.cube"}));
+      } else {
         long timeLeft = 0;
-        if (!player.hasPermission("footcube.cube.bypass.spawn-cooldown"))
-          timeLeft = getCooldown().getTimeleft(player.getUniqueId(), getCooldown().getCubeSpawnCooldown());
+
+        // Check if the player has permission to bypass the spawn cooldown
+        if (!player.hasPermission("footcube.cube.bypass.spawn-cooldown")) {
+          timeLeft = getCooldown().getTimeleft(player.getUniqueId(), getCooldown().getCubeSpawnCooldown(), true);
+        }
+
         if (timeLeft == 0) {
           final Location location = player.getLocation().add(0.0, 1.0, 0.0);
+
+          // Find nearby cubes
           List<Slime> cubes = new ArrayList<>();
-          for (final Entity entity : location.getWorld().getNearbyEntities(location, 50, 40, 50))
-            if (entity instanceof Slime) cubes.add((Slime) entity);
+          for (final Entity entity : location.getWorld().getNearbyEntities(location, 50, 40, 50)) {
+            if (entity instanceof Slime) {
+              cubes.add((Slime) entity);
+            }
+          }
+
+          // Check if there are too many cubes nearby
           if (cubes.size() >= 5) {
-            getLogger().send(player, Lang.TOO_MANY_CUBES.getConfigValue(null));
+            getLogger().send(player, Lang.TOO_MANY_CUBES.getMessage(null));
             return false;
           }
+
+          // Spawn a cube
           getPhysics().spawnCube(location);
-          getLogger().send(player, Lang.CUBE_SPAWNED.getConfigValue(null));
+          getLogger().send(player, Lang.CUBE_SPAWNED.getMessage(null));
           getCooldown().setCooldown(player.getUniqueId(), System.currentTimeMillis());
-        } else getLogger().send(player, Lang.ON_COOLDOWN.getConfigValue(new String[]{String.valueOf(timeLeft / 1000)}));
+        } else {
+          // Player is on cooldown
+          getLogger().send(player, Lang.ON_COOLDOWN.getMessage(new String[]{String.valueOf(timeLeft / 1000)}));
+        }
       }
     }
     return true;

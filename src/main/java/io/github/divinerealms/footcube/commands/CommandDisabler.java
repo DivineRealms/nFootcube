@@ -22,12 +22,12 @@ public class CommandDisabler implements CommandExecutor {
   @Override
   public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
     if (args.length < 2 || args[1].equalsIgnoreCase("help")) {
-      getLogger().send(sender, Lang.COMMAND_DISABLER_HELP.getConfigValue(null));
+      getLogger().send(sender, Lang.COMMAND_DISABLER_HELP.getMessage(null));
     } else if (args[1].equalsIgnoreCase("add")) {
 
     } else if (args[1].equalsIgnoreCase("remove")) {
 
-    } else getLogger().send(sender, Lang.UNKNOWN_COMMAND.getConfigValue(null));
+    } else getLogger().send(sender, Lang.UNKNOWN_COMMAND.getMessage(null));
     return true;
   }
 }
