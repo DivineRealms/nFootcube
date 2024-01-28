@@ -1,8 +1,7 @@
 package io.github.divinerealms.footcube.core;
 
 import io.github.divinerealms.footcube.Footcube;
-import io.github.divinerealms.footcube.configs.Config;
-import io.github.divinerealms.footcube.configs.Lang;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.features.DisableCommands;
 import io.github.divinerealms.footcube.features.Statistics;
 import io.github.divinerealms.footcube.managers.PlayerDataManager;
@@ -19,7 +18,6 @@ import org.bukkit.entity.Slime;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +30,6 @@ public class Organization {
   private final Logger logger;
   private final Footcube plugin;
   public DisableCommands disableCommands;
-  public String pluginString;
-  public String adminString;
   public String or;
   public String setupGuy;
   public int setupType;
@@ -65,8 +61,7 @@ public class Organization {
   public boolean[] leftPlayerIsRed;
   public long announcementTime;
   public Statistics stats;
-  private final Config config;
-  private final FileConfiguration cfg;
+  private FileConfiguration cfg;
 
   @SuppressWarnings("ALL")
   public Organization(final Footcube pl, final UtilManager utilManager) {
@@ -101,24 +96,23 @@ public class Organization {
     this.leftMatches = new Match[0];
     this.leftPlayerIsRed = new boolean[0];
     this.plugin = pl;
-    this.disableCommands = new DisableCommands(this.plugin, this);
-    config = new Config(getPlugin());
-    cfg = config.getConfigFile();
+    this.disableCommands = new DisableCommands(this.plugin, this, getUtilManager());
+    this.cfg = getPlugin().getConfig();
     this.loadArenas(cfg);
     this.stats=new Statistics(getPlugin());
     Collection<? extends Player> onlinePlayers;
-    this.plugin.getServer().getScheduler().scheduleSyncRepeatingTask((Plugin)this.plugin, (Runnable)new Runnable() {
-      @Override
-      public void run() {
-        Organization.this.update();
-      }
-    }, 1L, 1L);
-    this.plugin.getServer().getScheduler().scheduleSyncRepeatingTask((Plugin)this.plugin, (Runnable)new Runnable() {
-      @Override
-      public void run() {
-        Organization.this.refreshCache();
-      }
-    }, 50L, 50L);
+//    this.plugin.getServer().getScheduler().scheduleSyncRepeatingTask((Plugin)this.plugin, (Runnable)new Runnable() {
+//      @Override
+//      public void run() {
+//        Organization.this.update();
+//      }
+//    }, 1L, 1L);
+//    this.plugin.getServer().getScheduler().scheduleSyncRepeatingTask((Plugin)this.plugin, (Runnable)new Runnable() {
+//      @Override
+//      public void run() {
+//        Organization.this.refreshCache();
+//      }
+//    }, 50L, 50L);
     if (cfg.contains("arenas.world")) {
       for (final Entity e : this.plugin.getServer().getWorld(cfg.getString("arenas.world")).getEntities()) {
         if (e instanceof Slime) {
@@ -277,9 +271,9 @@ public class Organization {
       for (int length = (onlinePlayers = this.plugin.getServer().getOnlinePlayers()).size(), i = 0; i < length; ++i) {
         final Player p = (Player)onlinePlayers.toArray()[i];
         if (!this.playingPlayers.contains(p.getName()) && !this.waitingPlayers.containsKey(p.getName())) {
-          if (m.time < 0) getLogger().send(p, Lang.PLAYER_LEFT.getMessage(new String[]{m.type + "v" + m.type}));
-          else getLogger().send(p, Lang.PLAYER_LEFT.getMessage(new String[]{m.type + "v" + m.type}) + Lang.PLAYER_LEFT_ACTIVE.getMessage(new String[]{String.valueOf(m.time)}));
-          getLogger().send(p, Lang.TAKEPLACE.getMessage(null));
+          if (m.time < 0) getLogger().send(p, Messages.PLAYER_LEFT.getMessage(new String[]{m.type + "v" + m.type}));
+          else getLogger().send(p, Messages.PLAYER_LEFT.getMessage(new String[]{m.type + "v" + m.type}) + Messages.PLAYER_LEFT_ACTIVE.getMessage(new String[]{String.valueOf(m.time)}));
+          getLogger().send(p, Messages.TAKEPLACE.getMessage(null));
         }
       }
     }
@@ -416,16 +410,16 @@ public class Organization {
   public void removeTeam(final Player p) {
     if (this.team.containsKey(p)) {
       final Player player = this.team.get(p);
-      getLogger().send(player, Lang.REQUEST_DENY.getMessage(new String[]{p.getName()}));
-      getLogger().send(p, Lang.REQUEST_DENY_JOIN.getMessage(null));
+      getLogger().send(player, Messages.REQUEST_DENY.getMessage(new String[]{p.getName()}));
+      getLogger().send(p, Messages.REQUEST_DENY_JOIN.getMessage(null));
       this.teamType.remove(player);
       this.teamReverse.remove(player);
       this.team.remove(p);
     }
     if (this.teamReverse.containsKey(p)) {
       final Player player = this.teamReverse.get(p);
-      getLogger().send(player, Lang.REQUEST_DENY.getMessage(new String[]{p.getName()}));
-      getLogger().send(p, Lang.REQUEST_DENY_JOIN.getMessage(null));
+      getLogger().send(player, Messages.REQUEST_DENY.getMessage(new String[]{p.getName()}));
+      getLogger().send(p, Messages.REQUEST_DENY_JOIN.getMessage(null));
       this.teamType.remove(p);
       this.teamReverse.remove(p);
       this.team.remove(player);
@@ -583,9 +577,9 @@ public class Organization {
     final int rank = (int) (skillLevel * 2.0 - 0.5);
 
     if (w < 0)
-      getLogger().send(p, Lang.STATS.getMessage(new String[]{String.valueOf(m), String.valueOf(w), String.valueOf(t), String.valueOf(l), "nije učestvovao u FC", String.valueOf(s), String.valueOf(g), String.valueOf(gm), String.valueOf(a)}));
+      getLogger().send(p, Messages.STATS.getMessage(new String[]{String.valueOf(m), String.valueOf(w), String.valueOf(t), String.valueOf(l), "nije učestvovao u FC", String.valueOf(s), String.valueOf(g), String.valueOf(gm), String.valueOf(a)}));
     else
-      getLogger().send(p, Lang.STATS.getMessage(new String[]{String.valueOf(m), String.valueOf(w), String.valueOf(t), String.valueOf(l), String.valueOf(mw), String.valueOf(s), String.valueOf(g), String.valueOf(gm), String.valueOf(a)}));
+      getLogger().send(p, Messages.STATS.getMessage(new String[]{String.valueOf(m), String.valueOf(w), String.valueOf(t), String.valueOf(l), String.valueOf(mw), String.valueOf(s), String.valueOf(g), String.valueOf(gm), String.valueOf(a)}));
   }
 
   public void update() {
@@ -611,9 +605,9 @@ public class Organization {
       for (int length = (onlinePlayers = this.plugin.getServer().getOnlinePlayers()).size(), j = 0; j < length; ++j) {
         final Player p = (Player) onlinePlayers.toArray()[j];
         if (!this.playingPlayers.contains(p.getName()) && !this.waitingPlayers.containsKey(p.getName())) {
-          if (m.time < 0) getLogger().send(p, Lang.PLAYER_LEFT.getMessage(new String[]{m.type + "v" + m.type}));
-          else getLogger().send(p, Lang.PLAYER_LEFT.getMessage(new String[]{m.type + "v" + m.type}) + Lang.PLAYER_LEFT_ACTIVE.getMessage(new String[]{String.valueOf(m.time)}));
-          getLogger().send(p, Lang.TAKEPLACE.getMessage(null));
+          if (m.time < 0) getLogger().send(p, Messages.PLAYER_LEFT.getMessage(new String[]{m.type + "v" + m.type}));
+          else getLogger().send(p, Messages.PLAYER_LEFT.getMessage(new String[]{m.type + "v" + m.type}) + Messages.PLAYER_LEFT_ACTIVE.getMessage(new String[]{String.valueOf(m.time)}));
+          getLogger().send(p, Messages.TAKEPLACE.getMessage(null));
         }
       }
     }

@@ -1,7 +1,6 @@
 package io.github.divinerealms.footcube.utils;
 
-import io.github.divinerealms.footcube.configs.Config;
-import io.github.divinerealms.footcube.configs.Lang;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +20,6 @@ import java.util.*;
 public class Physics {
   private final Plugin plugin;
   private final Server server;
-  private final Config config;
   private final Logger logger;
 
   private final double regularKickLimit;
@@ -47,14 +45,13 @@ public class Physics {
   public Physics(final Plugin plugin, final UtilManager utilManager) {
     this.plugin = plugin;
     this.server = plugin.getServer();
-    this.config = utilManager.getConfig();
     this.logger = utilManager.getLogger();
 
     // Load constants from config
-    this.regularKickLimit = getConfig().getDouble("cube.power-limit.regular-kick");
-    this.chargedKickLimit = getConfig().getDouble("cube.power-limit.charged-kick");
-    this.kickPower = getConfig().getDouble("cube.kick-power");
-    this.chargeRefillSpeed = getConfig().getDouble("cube.power-limit.charge-refill");
+    this.regularKickLimit = getPlugin().getConfig().getDouble("cube.power-limit.regular-kick");
+    this.chargedKickLimit = getPlugin().getConfig().getDouble("cube.power-limit.charged-kick");
+    this.kickPower = getPlugin().getConfig().getDouble("cube.kick-power");
+    this.chargeRefillSpeed = getPlugin().getConfig().getDouble("cube.power-limit.charge-refill");
 
     this.potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, -3, false);
     this.velocities = new HashMap<>();
@@ -71,9 +68,9 @@ public class Physics {
 
   // Reload constants from config
   public void reload() {
-    this.soundMove = getConfig().getSound("cube.sounds.move");
-    this.soundKick = getConfig().getSound("cube.sounds.kick");
-    this.cubeEffect = getConfig().getEntityEffect("cube.effect.type");
+    this.soundMove = Sound.valueOf(getPlugin().getConfig().getString("cube.sounds.move"));
+    this.soundKick = Sound.valueOf(getPlugin().getConfig().getString("cube.sounds.kick"));
+    this.cubeEffect = EntityEffect.valueOf(getPlugin().getConfig().getString("cube.effect.type"));
     removeCubes();
   }
 
@@ -208,7 +205,7 @@ public class Physics {
       cube.setVelocity(newV);
       cube.addPotionEffect(getPotionEffect());
 
-      if (getConfig().getBoolean("cube.effect.enabled")) cube.playEffect(getCubeEffect());
+      if (getPlugin().getConfig().getBoolean("cube.effect.enabled")) cube.playEffect(getCubeEffect());
 
       getVelocities().put(cubeID, newV);
     }
@@ -227,8 +224,8 @@ public class Physics {
 
   // Debug method to display information to a player
   public void debug(final Player player) {
-    if (getConfig().getBoolean("debug.ball-hits")) {
-      getLogger().send("fcfa", Lang.DEBUG_BALL_HITS.getMessage(
+    if (getPlugin().getConfig().getBoolean("debug.ball-hits")) {
+      getLogger().send("fcfa", Messages.DEBUG_BALL_HITS.getMessage(
           new String[]{player.getName(), format(getPower()), format(getCharge()),
               format(getKickPower()), format(getTotal())}));
     }
@@ -236,7 +233,7 @@ public class Physics {
 
   // Play sound based on the action (kick or move) of a cube
   public void playSound(final Slime cube, final boolean isKick) {
-    if (getConfig().getBoolean("cube.sounds.enabled")) {
+    if (getPlugin().getConfig().getBoolean("cube.sounds.enabled")) {
       cube.getWorld().playSound(cube.getLocation(), (isKick ? getSoundKick() : getSoundMove()), 0.75F, 1F);
     }
   }

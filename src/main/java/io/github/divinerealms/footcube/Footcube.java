@@ -1,10 +1,7 @@
 package io.github.divinerealms.footcube;
 
-import io.github.divinerealms.footcube.commands.BaseCommand;
-import io.github.divinerealms.footcube.commands.ClearCubeCommand;
-import io.github.divinerealms.footcube.commands.CommandDisabler;
-import io.github.divinerealms.footcube.commands.CubeCommand;
-import io.github.divinerealms.footcube.configs.Config;
+import io.github.divinerealms.footcube.commands.*;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.managers.ConfigManager;
 import io.github.divinerealms.footcube.managers.ListenerManager;
 import io.github.divinerealms.footcube.managers.UtilManager;
@@ -15,28 +12,26 @@ import net.megavex.scoreboardlibrary.api.noop.NoopScoreboardLibrary;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.logging.Level;
 
 @Getter
 @Setter
 public class Footcube extends JavaPlugin {
+  // ConfigManager for handling configuration files
   private final ConfigManager configManager = new ConfigManager(this, "");
-  private Config config;
-  private UtilManager utilManager;
-  private ListenerManager listenerManager;
-  public ScoreboardLibrary scoreboardLibrary;
-  private Economy economy;
-
-  public Footcube(final UtilManager utilManager, final ListenerManager listenerManager) {
-    this.utilManager = utilManager;
-    this.listenerManager = listenerManager;
-  }
+  private UtilManager utilManager; // Manager for various utility functions
+  private ListenerManager listenerManager; // Manager for handling event listeners
+  public ScoreboardLibrary scoreboardLibrary; // Scoreboard library for displaying information
+  private Economy economy; // Economy system for handling in-game currency
 
   @Override
   public void onEnable() {
+    setupMessages();
+
     // Initialize Config and setup plugin
-    config = new Config(this);
+    saveDefaultConfig();
     setup();
 
     // Log plugin information
@@ -46,7 +41,7 @@ public class Footcube extends JavaPlugin {
     getLogger().info("Successfully enabled!");
 
     // Reload configuration
-    getConfig().reload();
+    getConfigManager().reloadConfig("config.yml");
   }
 
   @Override
@@ -59,23 +54,32 @@ public class Footcube extends JavaPlugin {
     // Reload tasks
     shutdown();
     getUtilManager().reloadUtils();
-    getConfig().reload();
+    getConfigManager().reloadConfig("config.yml");
     setup();
   }
 
-  public void setup() {
-    // Save default configuration
-    saveDefaultConfig();
+  private void setupMessages() {
+    getConfigManager().createNewFile("messages.yml", "Footcube Messages", "Loading messages.yml");
+    loadMessages();
+  }
 
+  private void loadMessages() {
+    Messages.setFile(getConfigManager().getConfig("messages.yml"));
+
+    for (final Messages value : Messages.values())
+      getConfigManager().getConfig("messages.yml").addDefault(value.getPath(), value.getDefault());
+
+    getConfigManager().getConfig("messages.yml").options().copyDefaults(true);
+    getConfigManager().saveConfig("messages.yml");
+  }
+
+  public void setup() {
+    // Check if Vault is available and setup economy
     if (!setupEconomy())
       getLogger().log(Level.SEVERE, "Vault not found. Economy disabled.");
 
     // Initialize managers and components
-    setUtilManager(new UtilManager(this));
-    setListenerManager(new ListenerManager(this, this, getUtilManager()));
-    getUtilManager().reloadUtils();
-    loadScoreboardLibrary();
-    registerCommands();
+    initializeManagersAndComponents();
 
     // Unregister and register listeners
     if (getListenerManager() != null && getListenerManager().isRegistered())
@@ -83,15 +87,19 @@ public class Footcube extends JavaPlugin {
     if (getListenerManager() != null) getListenerManager().registerListeners();
 
     // Schedule repeating task
-    getServer().getScheduler().runTaskTimer(this, getUtilManager().getPhysics()::update, 20L, 1L);
+    final BukkitScheduler scheduler = getServer().getScheduler();
+    scheduler.runTaskTimer(this, getUtilManager().getPhysics()::update, 20L, 1L);
+    scheduler.runTaskTimer(this, getUtilManager().getOrganization()::update, 20L, 1L);
+    scheduler.runTaskTimer(this, getUtilManager().getOrganization()::refreshCache, 50L, 50L);
   }
 
   private void registerCommands() {
     // Register plugin commands
     getCommand("footcube").setExecutor(new BaseCommand(this, getUtilManager()));
     getCommand("cube").setExecutor(new CubeCommand(getUtilManager()));
-    getCommand("clearcube").setExecutor(new ClearCubeCommand(getUtilManager()));
+    getCommand("clearcube").setExecutor(new ClearCubeCommand(this, getUtilManager()));
     getCommand("commanddisabler").setExecutor(new CommandDisabler(getUtilManager()));
+    getCommand("teamchat").setExecutor(new TeamChatCommand(this, getUtilManager()));
   }
 
   private void shutdown() {
@@ -100,6 +108,19 @@ public class Footcube extends JavaPlugin {
     getServer().getScheduler().cancelTasks(this);
     getServer().getMessenger().unregisterIncomingPluginChannel(this);
     getListenerManager().unregisterListeners();
+  }
+
+  private void initializeManagersAndComponents() {
+    // Initialize UtilManager, ListenerManager
+    setUtilManager(new UtilManager(this, this));
+    setListenerManager(new ListenerManager(this, this, getUtilManager()));
+
+    // Reload utility functions
+    getUtilManager().reloadUtils();
+
+    // Load the ScoreboardLibrary and register commands
+    loadScoreboardLibrary();
+    registerCommands();
   }
 
   private void loadScoreboardLibrary() {
@@ -114,10 +135,25 @@ public class Footcube extends JavaPlugin {
   }
 
   public boolean setupEconomy() {
-    if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
+    // Check for Vault availability
+    if (getServer().getPluginManager().getPlugin("Vault") == null) {
+      getLogger().log(Level.SEVERE, "Vault not found. Economy disabled.");
+      return false;
+    }
+
+    // Setup economy service
     RegisteredServiceProvider<Economy> registeredServiceProvider = getServer().getServicesManager().getRegistration(Economy.class);
-    if (registeredServiceProvider == null) return false;
+    if (registeredServiceProvider == null) {
+      getLogger().log(Level.SEVERE, "Economy service provider not found. Economy disabled.");
+      return false;
+    }
+
     economy = registeredServiceProvider.getProvider();
-    return this.economy != null;
+    if (this.economy == null) {
+      getLogger().log(Level.SEVERE, "Failed to get Economy provider. Economy disabled.");
+      return false;
+    }
+
+    return true;
   }
 }

@@ -1,4 +1,5 @@
 plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id "java"
 }
 
@@ -42,8 +43,6 @@ dependencies {
 
     // If using the 1.8 version implementation, add Adventure as well:
     implementation("net.kyori:adventure-platform-bukkit:4.0.1")
-
-    implementation 'org.slf4j:slf4j-log4j1:1.7.29'
     implementation files('libs/spigot-1.8.8-R0.1-SNAPSHOT-latest.jar')
 
     annotationProcessor 'org.projectlombok:lombok:1.18.22'

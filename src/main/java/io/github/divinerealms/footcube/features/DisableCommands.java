@@ -1,7 +1,11 @@
 package io.github.divinerealms.footcube.features;
 
 import io.github.divinerealms.footcube.Footcube;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.core.Organization;
+import io.github.divinerealms.footcube.managers.UtilManager;
+import io.github.divinerealms.footcube.utils.Logger;
+import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,15 +15,18 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import java.util.ArrayList;
 
+@Getter
 public class DisableCommands implements Listener {
   private final Organization organization;
+  private final Logger logger;
   public ArrayList<String> commands;
 
-  public DisableCommands(final Footcube pl, final Organization org) {
+  public DisableCommands(final Footcube pl, final Organization org, final UtilManager utilManager) {
     this.commands = new ArrayList<>();
     this.organization = org;
+    this.logger = utilManager.getLogger();
     pl.getServer().getPluginManager().registerEvents(this, pl);
-    final FileConfiguration cfg = pl.getConfig();
+    FileConfiguration cfg = pl.getConfig();
     cfg.addDefault("enabledCommands", "");
     pl.saveConfig();
     String[] split;
@@ -42,7 +49,7 @@ public class DisableCommands implements Listener {
         }
       }
       if (!allowed) {
-        p.sendMessage(this.organization.pluginString + "You can't use that command in the match.");
+        getLogger().send(p, Messages.DISABLED_COMMAND.getMessage(null));
         e.setCancelled(true);
       }
     }

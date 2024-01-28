@@ -1,7 +1,7 @@
 package io.github.divinerealms.footcube.listeners;
 
 import io.github.divinerealms.footcube.Footcube;
-import io.github.divinerealms.footcube.configs.Lang;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.core.Organization;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import io.github.divinerealms.footcube.utils.Logger;
@@ -33,7 +33,7 @@ public class PlayerQuitListener implements Listener {
     getOrganization().playingPlayers.remove(p.getName());
     if (getOrganization().team.containsKey(p)) {
       final Player player = getOrganization().team.get(p);
-      getLogger().send(player, Lang.REQUEST_DENY.getMessage(new String[]{p.getName()}));
+      getLogger().send(player, Messages.REQUEST_DENY.getMessage(new String[]{p.getName()}));
       getOrganization().teamType.remove(player);
       getOrganization().teamReverse.remove(player);
       getOrganization().team.remove(p);
@@ -48,14 +48,14 @@ public class PlayerQuitListener implements Listener {
       for (int i = 0; i < getOrganization().waitingTeams.length; ++i) {
         if (getOrganization().waitingTeams[i][0] == p) {
           final Player player2 = getOrganization().waitingTeams[i][1];
-          getLogger().send(player2, Lang.TEAMMATE_LEFT.getMessage(null));
+          getLogger().send(player2, Messages.TEAMMATE_LEFT.getMessage(null));
           getOrganization().waitingTeams = getOrganization().reduceArray(getOrganization().waitingTeams, p);
           getOrganization().waitingTeamPlayers.remove(p);
           getOrganization().waitingTeamPlayers.remove(player2);
         }
         else if (getOrganization().waitingTeams[i][1] == p) {
           final Player player2 = getOrganization().waitingTeams[i][0];
-          getLogger().send(player2, Lang.TEAMMATE_LEFT.getMessage(null));
+          getLogger().send(player2, Messages.TEAMMATE_LEFT.getMessage(null));
           getOrganization().waitingTeams = getOrganization().reduceArray(getOrganization().waitingTeams, p);
           getOrganization().waitingTeamPlayers.remove(p);
           getOrganization().waitingTeamPlayers.remove(player2);

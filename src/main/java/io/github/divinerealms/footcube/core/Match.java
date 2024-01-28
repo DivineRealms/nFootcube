@@ -2,8 +2,7 @@ package io.github.divinerealms.footcube.core;
 
 import com.connorlinfoot.titleapi.TitleAPI;
 import io.github.divinerealms.footcube.Footcube;
-import io.github.divinerealms.footcube.configs.Config;
-import io.github.divinerealms.footcube.configs.Lang;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.managers.PlayerDataManager;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import io.github.divinerealms.footcube.utils.GoalExplosion;
@@ -17,6 +16,7 @@ import net.megavex.scoreboardlibrary.api.sidebar.Sidebar;
 import net.megavex.scoreboardlibrary.api.sidebar.component.ComponentSidebarLayout;
 import net.megavex.scoreboardlibrary.api.sidebar.component.SidebarComponent;
 import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -51,8 +51,8 @@ public class Match {
   private final ScoreboardManager sbm;
   private Slime cube;
   private final Sidebar sidebar;
-  private Config cfg;
   private final boolean isEconomyEnabled;
+  private FileConfiguration cfg;
 
   public Match(final UtilManager utilManager, final Organization org, final Footcube plugin, final int type, final Location blueLocation, final Location redLocation, final Location middleLocation, final int id) {
     this.redPlayers = new Player[0];
@@ -111,7 +111,7 @@ public class Match {
   }
 
   private ComponentSidebarLayout prematchLayout() {
-    cfg = new Config(getPlugin());
+    cfg = getPlugin().getConfig();
     Component title = Component.text("FOOTBALL").color(NamedTextColor.WHITE).decoration(TextDecoration.BOLD, true);
     String name = getCfg().getString("arenas." + getType() + "v" + getType() + "." + (getArena() + 1) + ".name");
     Component blue = Component.text("  ")
@@ -304,12 +304,12 @@ public class Match {
       this.redPlayers = this.extendArray(this.redPlayers, p);
       this.isRed.put(p, true);
       p.teleport(this.redLocation);
-      getLogger().send(p, Lang.JOIN_RED_TEAM.getMessage(null));
+      getLogger().send(p, Messages.JOIN_RED_TEAM.getMessage(null));
     } else if (this.bluePlayers.length < this.type) {
       this.bluePlayers = this.extendArray(this.bluePlayers, p);
       this.isRed.put(p, false);
       p.teleport(this.blueLocation);
-      getLogger().send(p, Lang.JOIN_BLUE_TEAM.getMessage(null));
+      getLogger().send(p, Messages.JOIN_BLUE_TEAM.getMessage(null));
     }
     if (this.bluePlayers.length >= this.type && this.redPlayers.length >= this.type) {
       this.phase = 2;
@@ -330,9 +330,9 @@ public class Match {
           player.getInventory().setChestplate(this.blueChestPlate);
           player.getInventory().setLeggings(this.blueLeggings);
         }
-        getLogger().send(p, Lang.MATCH_START.getMessage(null));
+        getLogger().send(p, Messages.MATCH_START.getMessage(null));
       }
-    } else getLogger().send(p, Lang.LEAVE_MATCH.getMessage(null));
+    } else getLogger().send(p, Messages.LEAVE_MATCH.getMessage(null));
   }
 
   public void leave(final Player p) {
@@ -349,12 +349,12 @@ public class Match {
       this.redPlayers = this.extendArray(getRedPlayers(), p);
       getIsRed().put(p, true);
       p.teleport(getRedLocation());
-      getLogger().send(p, Lang.JOIN_RED_TEAM.getMessage(null));
+      getLogger().send(p, Messages.JOIN_RED_TEAM.getMessage(null));
     } else if (getBluePlayers().length < getType()) {
       this.bluePlayers = this.extendArray(getBluePlayers(), p);
       getIsRed().put(p, false);
       p.teleport(getBlueLocation());
-      getLogger().send(p, Lang.JOIN_BLUE_TEAM.getMessage(null));
+      getLogger().send(p, Messages.JOIN_BLUE_TEAM.getMessage(null));
     }
 
     if (getIsRed().get(p)) {
@@ -394,17 +394,17 @@ public class Match {
     if (getIsRed().containsKey(p)) {
       for (final Player redPlayers : getIsRed().keySet()) {
         if (getIsRed().get(redPlayers) && getIsRed().get(p))
-          getLogger().send(redPlayers, Lang.TC_RED.getMessage(new String[]{p.getName(), message}));
+          getLogger().send(redPlayers, Messages.TC_RED.getMessage(new String[]{p.getName(), message}));
         if (!getIsRed().get(redPlayers) && !getIsRed().get(p))
-          getLogger().send(redPlayers, Lang.TC_BLUE.getMessage(new String[]{p.getName(), message}));
+          getLogger().send(redPlayers, Messages.TC_BLUE.getMessage(new String[]{p.getName(), message}));
       }
     }
   }
 
   public boolean team(final Player p0, final Player p1) {
     if (getRedPlayers().length + getBluePlayers().length > 2 * getType() - 2 || (getTeams() >= 2 && getType() == 3)) return false;
-    getLogger().send(p0, Lang.TEAM_WITH.getMessage(new String[]{p1.getName()}));
-    getLogger().send(p1, Lang.TEAM_WITH.getMessage(new String[]{p0.getName()}));
+    getLogger().send(p0, Messages.TEAM_WITH.getMessage(new String[]{p1.getName()}));
+    getLogger().send(p1, Messages.TEAM_WITH.getMessage(new String[]{p0.getName()}));
     getTeamers().add(p0);
     getTeamers().add(p1);
     ++this.teams;
@@ -424,7 +424,7 @@ public class Match {
           this.redPlayers = this.extendArray(getRedPlayers(), p2);
           getIsRed().put(p2, true);
           p2.teleport(getRedLocation());
-          getLogger().send(p2, Lang.CHANGED_TEAM_WITH.getMessage(new String[]{p0.getName(), p1.getName()}));
+          getLogger().send(p2, Messages.CHANGED_TEAM_WITH.getMessage(new String[]{p0.getName(), p1.getName()}));
           join(p0);
           join(p1);
           rare = false;
@@ -440,7 +440,7 @@ public class Match {
             this.bluePlayers = this.extendArray(getBluePlayers(), p3);
             getIsRed().put(p3, true);
             p3.teleport(getBlueLocation());
-            getLogger().send(p3, Lang.CHANGED_TEAM_WITH.getMessage(new String[]{p0.getName(), p1.getName()}));
+            getLogger().send(p3, Messages.CHANGED_TEAM_WITH.getMessage(new String[]{p0.getName(), p1.getName()}));
             join(p0);
             join(p1);
             break;
@@ -493,12 +493,12 @@ public class Match {
       else getGoals().put(scorer, 1);
       if (isEconomyEnabled) {
         getPlugin().getEconomy().depositPlayer(scorer, scoreReward);
-        getLogger().send(scorer, Lang.SCORE_REWARD.getMessage(new String[]{String.valueOf(scoreReward)}));
+        getLogger().send(scorer, Messages.SCORE_REWARD.getMessage(new String[]{String.valueOf(scoreReward)}));
         }
       if (getGoals().get(scorer) == 3) {
-        getLogger().send(scorer, Lang.HATTY_REWARD.getMessage(new String[]{String.valueOf(scoreReward)}));
+        getLogger().send(scorer, Messages.HATTY_REWARD.getMessage(new String[]{String.valueOf(scoreReward)}));
         for (final Player players : getIsRed().keySet())
-          getLogger().send(players, Lang.HATTY.getMessage(new String[]{scorer.getName()}));
+          getLogger().send(players, Messages.HATTY.getMessage(new String[]{scorer.getName()}));
         if (isEconomyEnabled)
           getPlugin().getEconomy().depositPlayer(scorer, hattyReward);
       }
@@ -511,7 +511,7 @@ public class Match {
       assisterData.savePlayerData(assister.getUniqueId());
       if (isEconomyEnabled) {
         getPlugin().getEconomy().depositPlayer(assister, assistReward);
-        getLogger().send(assister, Lang.ASSIST_REWARD.getMessage(new String[]{String.valueOf(assistReward)}));
+        getLogger().send(assister, Messages.ASSIST_REWARD.getMessage(new String[]{String.valueOf(assistReward)}));
       }
       if (getAssists().containsKey(assister)) getAssists().put(assister, getAssists().get(assister) + 1);
       else getAssists().put(assister, 1);
@@ -557,15 +557,15 @@ public class Match {
       String message = ChatColor.translateAlternateColorCodes('&', scorerData.getString("custom_score_message"));
       if (!message.isEmpty()) {
         TitleAPI.sendTitle(p, 5, 40, 5, ChatColor.translateAlternateColorCodes('&',"&lGOOOOAL!"), ChatColor.WHITE + message);
-        getLogger().send(p, Lang.CUSTOM_SCORE_MESSAGE.getMessage(new String[]{message, scorer.getName()}));
+        getLogger().send(p, Messages.CUSTOM_SCORE_MESSAGE.getMessage(new String[]{message, scorer.getName()}));
       } else {
-        TitleAPI.sendTitle(p, 5, 40, 5, ChatColor.translateAlternateColorCodes('&', "&lGOOOOAL!"), ChatColor.translateAlternateColorCodes('&', Lang.SCORE_GOAL.getMessage(new String[]{scorer.getName()})));
+        TitleAPI.sendTitle(p, 5, 40, 5, ChatColor.translateAlternateColorCodes('&', "&lGOOOOAL!"), ChatColor.translateAlternateColorCodes('&', Messages.SCORE_GOAL.getMessage(new String[]{scorer.getName()})));
         if (assister != scorer && assister != null) {
-          if (number > 20.0) getLogger().send(p, Lang.SCORE_INCREDIBLE_ASSIST.getMessage(new String[]{scorer.getName(), assister.getName(), String.valueOf(Math.round(number))}));
-          else getLogger().send(p, Lang.SCORE_NORMAL_ASSIST.getMessage(new String[]{scorer.getName(), assister.getName(), String.valueOf(Math.round(number))}));
+          if (number > 20.0) getLogger().send(p, Messages.SCORE_INCREDIBLE_ASSIST.getMessage(new String[]{scorer.getName(), assister.getName(), String.valueOf(Math.round(number))}));
+          else getLogger().send(p, Messages.SCORE_NORMAL_ASSIST.getMessage(new String[]{scorer.getName(), assister.getName(), String.valueOf(Math.round(number))}));
         } else {
-          if (number > 20.0) getLogger().send(p, Lang.SCORE_INCREDIBLE.getMessage(new String[]{scorer.getName(), String.valueOf(Math.round(number))}));
-          else getLogger().send(p, Lang.SCORE_NORMAL.getMessage(new String[]{scorer.getName(), String.valueOf(Math.round(number))}));
+          if (number > 20.0) getLogger().send(p, Messages.SCORE_INCREDIBLE.getMessage(new String[]{scorer.getName(), String.valueOf(Math.round(number))}));
+          else getLogger().send(p, Messages.SCORE_NORMAL.getMessage(new String[]{scorer.getName(), String.valueOf(Math.round(number))}));
         }
       }
       Location goalLocation;
@@ -595,7 +595,7 @@ public class Match {
           if (ws > bws) playerData.setInt("best_win_streak", ws);
           if (isEconomyEnabled) {
             getPlugin().getEconomy().depositPlayer(p, winReward);
-            getLogger().send(p, Lang.WIN_REWARD.getMessage(new String[]{String.valueOf(winReward)}));
+            getLogger().send(p, Messages.WIN_REWARD.getMessage(new String[]{String.valueOf(winReward)}));
           }
         } else if (!getTakePlace().contains(p) && getType() != 1) playerData.setInt("win_streak", 0);
         if (x == 0.0 && y == 0.0 && z == 0.0) p.teleport(p.getWorld().getSpawnLocation());
@@ -606,8 +606,8 @@ public class Match {
         this.organization.clearInventory(p);
       } else {
         p.setLevel(10);
-        getLogger().send(p, Lang.CURRENT_RESULT.getMessage(new String[]{String.valueOf(getScoreRed()), String.valueOf(getScoreBlue())}));
-        getLogger().send(p, Lang.CONTINUE_5_SEC.getMessage(null));
+        getLogger().send(p, Messages.CURRENT_RESULT.getMessage(new String[]{String.valueOf(getScoreRed()), String.valueOf(getScoreBlue())}));
+        getLogger().send(p, Messages.CONTINUE_5_SEC.getMessage(null));
       }
       playerData.savePlayerData(p.getUniqueId());
     }
@@ -643,7 +643,7 @@ public class Match {
       if (getCountdown() <= 0) {
         String message;
         if (getPhase() == 2) {
-          message = Lang.MATCH_START.getMessage(null);
+          message = Messages.MATCH_START.getMessage(null);
           this.startTime = System.currentTimeMillis();
           this.redGoals = 0;
           this.blueGoals = 0;
@@ -655,7 +655,7 @@ public class Match {
             this.organization.playerStarts(p);
           }
         } else
-          message = Lang.MATCH_CONTINUING.getMessage(null);
+          message = Messages.MATCH_CONTINUING.getMessage(null);
         this.phase = 3;
         this.cube = getPhysics().spawnCube(getMiddleLocation());
         for (final Player p : getIsRed().keySet()) {
@@ -704,7 +704,7 @@ public class Match {
           }
           getOrganization().clearInventory(p);
           if (getScoreRed() > getScoreBlue()) {
-            getLogger().send(p, Lang.TIMES_UP_RED.getMessage(new String[]{String.valueOf(getScoreRed()), String.valueOf(getScoreBlue())}));
+            getLogger().send(p, Messages.TIMES_UP_RED.getMessage(new String[]{String.valueOf(getScoreRed()), String.valueOf(getScoreBlue())}));
             if (getType() != 1) {
               if (getIsRed().get(p) && !getTakePlace().contains(p)) {
                 playerData.riseInt("wins");
@@ -714,12 +714,12 @@ public class Match {
                 if (ws > bws) playerData.setInt("best_win_streak", ws);
                 if (isEconomyEnabled) {
                   getPlugin().getEconomy().depositPlayer(p, winReward);
-                  getLogger().send(p, Lang.WIN_REWARD.getMessage(new String[]{String.valueOf(winReward)}));
+                  getLogger().send(p, Messages.WIN_REWARD.getMessage(new String[]{String.valueOf(winReward)}));
                 }
               } else playerData.setInt("win_streak", 0);
-            } else getLogger().send(p, Lang.NO_STATS_FOR_THIS.getMessage(null));
+            } else getLogger().send(p, Messages.NO_STATS_FOR_THIS.getMessage(null));
           } else if (getScoreRed() < getScoreBlue()) {
-            getLogger().send(p, Lang.TIMES_UP_BLUE.getMessage(new String[]{String.valueOf(getScoreBlue()), String.valueOf(getScoreRed())}));
+            getLogger().send(p, Messages.TIMES_UP_BLUE.getMessage(new String[]{String.valueOf(getScoreBlue()), String.valueOf(getScoreRed())}));
             if (getType() != 1) {
               if (!getIsRed().get(p) && !getTakePlace().contains(p)) {
                 playerData.riseInt("wins");
@@ -729,19 +729,19 @@ public class Match {
                 if (ws > bws) playerData.setInt("best_win_streak", ws);
                 if (isEconomyEnabled) {
                   getPlugin().getEconomy().depositPlayer(p, winReward);
-                  getLogger().send(p, Lang.WIN_REWARD.getMessage(new String[]{String.valueOf(winReward)}));
+                  getLogger().send(p, Messages.WIN_REWARD.getMessage(new String[]{String.valueOf(winReward)}));
                 }
               } else playerData.setInt("win_streak", 0);
-            } else getLogger().send(p, Lang.NO_STATS_FOR_THIS.getMessage(null));
+            } else getLogger().send(p, Messages.NO_STATS_FOR_THIS.getMessage(null));
           } else {
-            getLogger().send(p, Lang.TIED.getMessage(null));
+            getLogger().send(p, Messages.TIED.getMessage(null));
             if (getTakePlace().contains(p)) continue;
             if (getType() == 1) continue;
             playerData.riseInt("ties");
             playerData.setInt("win_streak", 0);
             if (isEconomyEnabled) {
               getPlugin().getEconomy().depositPlayer(p, tiedReward);
-              getLogger().send(p, Lang.TIED_REWARD.getMessage(new String[]{String.valueOf(tiedReward)}));
+              getLogger().send(p, Messages.TIED_REWARD.getMessage(new String[]{String.valueOf(tiedReward)}));
             }
           }
           playerData.savePlayerData(p.getUniqueId());

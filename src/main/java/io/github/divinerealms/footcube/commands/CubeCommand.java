@@ -1,6 +1,6 @@
 package io.github.divinerealms.footcube.commands;
 
-import io.github.divinerealms.footcube.configs.Lang;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import io.github.divinerealms.footcube.utils.Cooldown;
 import io.github.divinerealms.footcube.utils.Logger;
@@ -42,13 +42,13 @@ public class CubeCommand implements CommandExecutor {
   public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
     if (!(sender instanceof Player)) {
       // Command can only be used by players
-      getLogger().send(sender, Lang.INGAME_ONLY.getMessage(null));
+      getLogger().send(sender, Messages.INGAME_ONLY.getMessage(null));
     } else {
       final Player player = (Player) sender;
 
       if (!player.hasPermission("footcube.cube")) {
         // Player doesn't have permission
-        getLogger().send(player, Lang.INSUFFICIENT_PERMISSION.getMessage(new String[]{"footcube.cube"}));
+        getLogger().send(player, Messages.INSUFFICIENT_PERMISSION.getMessage(new String[]{"footcube.cube"}));
       } else {
         long timeLeft = 0;
 
@@ -70,17 +70,17 @@ public class CubeCommand implements CommandExecutor {
 
           // Check if there are too many cubes nearby
           if (cubes.size() >= 5) {
-            getLogger().send(player, Lang.TOO_MANY_CUBES.getMessage(null));
+            getLogger().send(player, Messages.TOO_MANY_CUBES.getMessage(null));
             return false;
           }
 
           // Spawn a cube
           getPhysics().spawnCube(location);
-          getLogger().send(player, Lang.CUBE_SPAWNED.getMessage(null));
+          getLogger().send(player, Messages.CUBE_SPAWNED.getMessage(null));
           getCooldown().setCooldown(player.getUniqueId(), System.currentTimeMillis());
         } else {
           // Player is on cooldown
-          getLogger().send(player, Lang.ON_COOLDOWN.getMessage(new String[]{String.valueOf(timeLeft / 1000)}));
+          getLogger().send(player, Messages.ON_COOLDOWN.getMessage(new String[]{String.valueOf(timeLeft / 1000)}));
         }
       }
     }

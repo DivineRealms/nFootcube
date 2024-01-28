@@ -5,7 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 
 @Getter
-public enum Lang {
+public enum Messages {
   // Enum constants with their default values
   RELOAD_USAGE("reload.usage", "&6▎ &eUpozorenje: obrisaćete sve lopte ovom komandom! Ako se slažete kucajte &6/&efc reload confirm&c."),
   RELOAD_PLUGIN("reload.plugin", "&a▎ &fPlugin uspešno osvežen!"),
@@ -65,6 +65,10 @@ public enum Lang {
   PLAYER_LEFT("match.player-left", "&b▎ &fNeko je napustio &e{0} &fmeč! "),
   PLAYER_LEFT_ACTIVE("match.player-left-active", "&fOstalo je &e{0} sekundi."),
   TAKEPLACE("match.takeplace", "&b▎ &fMožete zauzeti ovo mesto komandom &6/&efc takeplace&f!"),
+  DISABLED_COMMAND("match.disabled-command", "&4▎ &cNe možete koristiti tu komandu tokom igre."),
+  TC_USAGE("match.tc-usage", "&4▎ &cNedovoljno argumenata. Koristite: &6/&etc poruka&c."),
+  NOT_IN_GAME("match.not-in-game", "&4▎ &cNiste u igri."),
+  BANNED("match.banned", "&4▎ &cNe možete učestvovati u igri jer ste banovani iz FC."),
   STATS("match.stats", String.join(System.lineSeparator(),
       "&9&m═══════════════════════════════════&r",
       "&r &r",
@@ -105,7 +109,7 @@ public enum Lang {
   private final String path, def;
 
   // Constructor for enum constants
-  Lang(final String path, final String start) {
+  Messages(final String path, final String start) {
     this.path = path;
     this.def = start;
   }

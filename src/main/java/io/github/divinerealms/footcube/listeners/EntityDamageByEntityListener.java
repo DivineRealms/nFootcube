@@ -1,6 +1,6 @@
 package io.github.divinerealms.footcube.listeners;
 
-import io.github.divinerealms.footcube.configs.Lang;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import io.github.divinerealms.footcube.utils.Cooldown;
 import io.github.divinerealms.footcube.utils.Logger;
@@ -67,7 +67,7 @@ public class EntityDamageByEntityListener implements Listener {
   private void handleCreativeModeAndRemoval(Player player, Slime cube, EntityDamageByEntityEvent event) {
     if (player.getGameMode() == GameMode.CREATIVE && player.hasPermission("nfootcube.clearcube")) {
       cube.remove();
-      getLogger().send(player, Lang.CUBE_CLEARED.getMessage(null));
+      getLogger().send(player, Messages.CUBE_CLEARED.getMessage(null));
 
       // Cancel the original damage event after cube removal
       event.setCancelled(true);

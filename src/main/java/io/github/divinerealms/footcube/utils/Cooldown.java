@@ -1,15 +1,14 @@
 package io.github.divinerealms.footcube.utils;
 
-import io.github.divinerealms.footcube.configs.Config;
-import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
+import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.UUID;
 
 @Getter
 public class Cooldown {
-  private final Config config;
+  private final Plugin plugin;
   private final HashMap<UUID, Long> cooldowns = new HashMap<>();
   private long cubeSpawnCooldown, cubeKickCooldown;
   private boolean isCubeKickCooldownEnabled;
@@ -17,19 +16,18 @@ public class Cooldown {
   /**
    * Constructor for the Cooldown class.
    *
-   * @param utilManager The UtilManager instance providing access to configurations.
    */
-  public Cooldown(final UtilManager utilManager) {
-    this.config = utilManager.getConfig();
+  public Cooldown(final Plugin plugin) {
+    this.plugin = plugin;
   }
 
   /**
    * Reloads the cooldown-related configuration values.
    */
   public void reload() {
-    this.cubeSpawnCooldown = getConfig().getInt("cube.spawn-cooldown");
-    this.cubeKickCooldown = getConfig().getInt("cube.kick-cooldown.cooldown");
-    this.isCubeKickCooldownEnabled = getConfig().getBoolean("cube.kick-cooldown.enabled");
+    this.cubeSpawnCooldown = getPlugin().getConfig().getInt("cube.spawn-cooldown");
+    this.cubeKickCooldown = getPlugin().getConfig().getInt("cube.kick-cooldown.cooldown");
+    this.isCubeKickCooldownEnabled = getPlugin().getConfig().getBoolean("cube.kick-cooldown.enabled");
   }
 
   /**

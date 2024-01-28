@@ -1,6 +1,6 @@
 package io.github.divinerealms.footcube.commands;
 
-import io.github.divinerealms.footcube.configs.Lang;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import io.github.divinerealms.footcube.utils.Logger;
 import lombok.Getter;
@@ -28,7 +28,7 @@ public class HelpCommand implements CommandExecutor {
   @Override
   public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
     // Send help message to the sender
-    getLogger().send(sender, Lang.HELP.getMessage(null));
+    getLogger().send(sender, Messages.HELP.getMessage(null));
     return true;
   }
 }

@@ -1,24 +1,28 @@
 package io.github.divinerealms.footcube.commands;
 
 import io.github.divinerealms.footcube.Footcube;
-import io.github.divinerealms.footcube.configs.Lang;
+import io.github.divinerealms.footcube.configs.Messages;
+import io.github.divinerealms.footcube.features.CustomGUIs;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import io.github.divinerealms.footcube.utils.Logger;
 import lombok.Getter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 @Getter
 public class BaseCommand implements CommandExecutor {
   private final Footcube plugin;
   private final UtilManager utilManager;
   private final Logger logger;
+  private final CustomGUIs customGUIs;
 
   public BaseCommand(final Footcube plugin, final UtilManager utilManager) {
     this.plugin = plugin;
     this.utilManager = utilManager;
     this.logger = utilManager.getLogger();
+    this.customGUIs = new CustomGUIs(plugin);
   }
 
   /**
@@ -44,9 +48,13 @@ public class BaseCommand implements CommandExecutor {
       // Handle reload command
       final ReloadCommand reloadCommand = new ReloadCommand(getPlugin(), getUtilManager());
       reloadCommand.onCommand(sender, command, label, args);
+    } else if (args[0].equalsIgnoreCase("goalexplosions") || args[0].equalsIgnoreCase("ge")) {
+      getCustomGUIs().explosionInventory((Player) sender);
+    } else if (args[0].equalsIgnoreCase("particles")) {
+      getCustomGUIs().particleInventory((Player) sender);
     } else {
       // Unknown command, send an error message
-      getLogger().send(sender, Lang.UNKNOWN_COMMAND.getMessage(new String[]{args[0]}));
+      getLogger().send(sender, Messages.UNKNOWN_COMMAND.getMessage(new String[]{args[0]}));
     }
 
     // Command was handled successfully

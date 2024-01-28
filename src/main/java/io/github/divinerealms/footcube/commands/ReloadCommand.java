@@ -1,7 +1,7 @@
 package io.github.divinerealms.footcube.commands;
 
 import io.github.divinerealms.footcube.Footcube;
-import io.github.divinerealms.footcube.configs.Lang;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.managers.UtilManager;
 import io.github.divinerealms.footcube.utils.Logger;
 import lombok.Getter;
@@ -32,20 +32,20 @@ public class ReloadCommand implements CommandExecutor {
   public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
     // Check if the sender has the necessary permission
     if (!sender.hasPermission("footcube.reload")) {
-      getLogger().send(sender, Lang.INSUFFICIENT_PERMISSION.getMessage(new String[]{"footcube.reload"}));
+      getLogger().send(sender, Messages.INSUFFICIENT_PERMISSION.getMessage(new String[]{"footcube.reload"}));
       return false;
     }
 
     // Check the number of arguments provided
     if (args.length < 2) {
-      getLogger().send(sender, Lang.RELOAD_USAGE.getMessage(null));
+      getLogger().send(sender, Messages.RELOAD_USAGE.getMessage(null));
     } else if (args[1].equalsIgnoreCase("confirm")) {
       // Reload the plugin
       getPlugin().reload();
-      getLogger().send(sender, Lang.RELOAD_PLUGIN.getMessage(null));
+      getLogger().send(sender, Messages.RELOAD_PLUGIN.getMessage(null));
     } else {
       // Unknown command
-      getLogger().send(sender, Lang.UNKNOWN_COMMAND.getMessage(null));
+      getLogger().send(sender, Messages.UNKNOWN_COMMAND.getMessage(null));
     }
     return true;
   }

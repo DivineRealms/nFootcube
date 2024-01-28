@@ -1,7 +1,7 @@
 package io.github.divinerealms.footcube.listeners;
 
 import io.github.divinerealms.footcube.Footcube;
-import io.github.divinerealms.footcube.configs.Lang;
+import io.github.divinerealms.footcube.configs.Messages;
 import io.github.divinerealms.footcube.core.Organization;
 import io.github.divinerealms.footcube.managers.PlayerDataManager;
 import io.github.divinerealms.footcube.managers.UtilManager;
@@ -45,6 +45,6 @@ public class PlayerJoinListener implements Listener {
     playerData.savePlayerData(player.getUniqueId());
 
     // Send a welcome message to the player
-    getLogger().send("helper", Lang.CREATED_PLAYER_DATA.getMessage(new String[]{player.getName()}));
+    getLogger().send("helper", Messages.CREATED_PLAYER_DATA.getMessage(new String[]{player.getName()}));
   }
 }
