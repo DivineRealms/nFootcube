@@ -6,14 +6,14 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 @Getter
 public enum Lang {
-  RELOAD_USAGE("reload.usage", "&6▎ &eUpozorenje: obrisaćete sve lopte ovom komandom! Ako se slažete kucajte &6/&efc reload confirm&c."),
+  RELOAD_USAGE("reload.usage", "&6▎ &eUpozorenje: &cobrisaćete sve lopte ovom komandom! Ako se slažete kucajte &6/&enfc reload all&c."),
   RELOAD_PLUGIN("reload.plugin", "&a▎ &fPlugin uspešno osvežen!"),
   RELOAD_CONFIG("reload.config", "&a▎ &fPoruke plugina uspešno osvežene!"),
   UNKNOWN_COMMAND("unknown-command", "&4▎ &cNepoznata komanda."),
   INSUFFICIENT_PERMISSION("insufficient-permission", "&4▎ &cNemate dozvolu za to ({0})."),
   INGAME_ONLY("ingame-only", "&4▎ &cOva komanda se može koristiti samo u igri."),
   ON_COOLDOWN("on-cooldown", "&4▎ &cProbajte ovu komandu ponovo za {0} sekundi."),
-  DEBUG_BALL_HITS("debug.ball-hits", "&8▎ &b{0} &7[&ePW {1} &7* &dCH {2} &7* &cKP {3} &7= &aTOTAL KP {4}&7]"),
+  DEBUG_BALL_HITS("debug.ball-hits", "&8▎ &e&lDEBUG: &b{0} &7[&ePW {1} &7* &dCH {2} &7* &cKP {3} &7= &aTOTAL KP {4}&7]"),
   INVALID_TIME("invalid-time", "&4▎ &cArgument za vreme \"&e{0}&c\" nije validan."),
   CUBE_SPAWNED("cube.spawned", "&a▎ &fLopta stvorena."),
   CUBE_CLEARED("cube.cleared", "&a▎ &fLopta obrisana."),

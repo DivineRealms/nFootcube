@@ -4,18 +4,19 @@ import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
 public class ConfigManager {
-  @Getter private final Plugin plugin;
+  @Getter private final JavaPlugin plugin;
   private final String folderName;
   private FileConfiguration config;
   private File configFile;
 
-  public ConfigManager(final Plugin plugin, final String folderName) {
+  public ConfigManager(final JavaPlugin plugin, final String folderName) {
     this.plugin = plugin;
     this.folderName = folderName;
   }
@@ -49,7 +50,7 @@ public class ConfigManager {
 
     try {
       getConfig(name).save(configFile);
-    } catch (final IOException | IllegalArgumentException exception ) {
+    } catch (final IOException exception) {
       plugin.getLogger().log(Level.SEVERE, "Could not save config to " + configFile, exception);
     }
   }

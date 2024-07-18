@@ -13,13 +13,13 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 public class PlayerToggleSneakListener implements Listener {
   private final Physics physics;
 
-  public PlayerToggleSneakListener(final UtilManager utilManager) {
+  public PlayerToggleSneakListener(UtilManager utilManager) {
     this.physics = utilManager.getPhysics();
   }
 
   @EventHandler
-  public void onSneak(final PlayerToggleSneakEvent event) {
-    final Player player = event.getPlayer();
+  public void onSneak(PlayerToggleSneakEvent event) {
+    Player player = event.getPlayer();
     if (player.getGameMode() != GameMode.SURVIVAL) return;
     if (event.isSneaking()) getPhysics().getCharges().put(player.getUniqueId(), 0d);
     else {

@@ -17,15 +17,15 @@ import java.util.UUID;
 public class PlayerMoveListener implements Listener {
   private final Physics physics;
 
-  public PlayerMoveListener(final UtilManager utilManager) {
+  public PlayerMoveListener(UtilManager utilManager) {
     this.physics = utilManager.getPhysics();
   }
 
   @EventHandler
-  public void onMove(final PlayerMoveEvent event) {
+  public void onMove(PlayerMoveEvent event) {
     if (event.getPlayer().getGameMode() != GameMode.SURVIVAL) return;
-    final UUID playerID = event.getPlayer().getUniqueId();
-    final Deque<Location> locations = getPhysics().getLastLocations().computeIfAbsent(playerID, key -> new ArrayDeque<>());
+    UUID playerID = event.getPlayer().getUniqueId();
+    Deque<Location> locations = getPhysics().getLastLocations().computeIfAbsent(playerID, key -> new ArrayDeque<>());
     if (locations.size() == 2) locations.poll();
     locations.add(event.getTo());
   }

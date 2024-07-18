@@ -16,19 +16,19 @@ public class PlayerInteractEntityListener implements Listener {
   private final Plugin plugin;
   private final Physics physics;
 
-  public PlayerInteractEntityListener(final Plugin plugin, final UtilManager utilManager) {
+  public PlayerInteractEntityListener(Plugin plugin, UtilManager utilManager) {
     this.plugin = plugin;
     this.physics = utilManager.getPhysics();
   }
 
   @EventHandler
-  public void onRightClick(final PlayerInteractEntityEvent event) {
+  public void onRightClick(PlayerInteractEntityEvent event) {
     if (!(event.getRightClicked() instanceof Slime)) return;
     if (!getPhysics().getCubes().contains((Slime) event.getRightClicked())) return;
     if (getPhysics().getKicked().containsKey(event.getPlayer().getUniqueId())) return;
     if (event.getPlayer().getGameMode() != GameMode.SURVIVAL) return;
 
-    final Slime cube = (Slime) event.getRightClicked();
+    Slime cube = (Slime) event.getRightClicked();
     cube.setVelocity(cube.getVelocity().add(new Vector(0, 0.6, 0)));
     getPhysics().playSound(cube, false);
     getPhysics().getKicked().put(event.getPlayer().getUniqueId(), System.currentTimeMillis());

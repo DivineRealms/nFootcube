@@ -14,7 +14,7 @@ public class ListenerManager {
   private final UtilManager utilManager;
   @Setter private boolean registered = false;
 
-  public ListenerManager(final Plugin plugin, final UtilManager utilManager) {
+  public ListenerManager(Plugin plugin, UtilManager utilManager) {
     this.plugin = plugin;
     this.pluginManager = plugin.getServer().getPluginManager();
     this.utilManager = utilManager;
@@ -27,7 +27,7 @@ public class ListenerManager {
     getPluginManager().registerEvents(new EntityDamageListener(), getPlugin());
     getPluginManager().registerEvents(new FoodLevelChangeListener(), getPlugin());
     getPluginManager().registerEvents(new PlayerInteractEntityListener(getPlugin(), getUtilManager()), getPlugin());
-    getPluginManager().registerEvents(new PlayerJoinListener(getPlugin(), getUtilManager()), getPlugin());
+    getPluginManager().registerEvents(new PlayerJoinListener(getUtilManager()), getPlugin());
     getPluginManager().registerEvents(new PlayerMoveListener(getUtilManager()), getPlugin());
     getPluginManager().registerEvents(new PlayerQuitListener(getUtilManager()), getPlugin());
     getPluginManager().registerEvents(new PlayerToggleSneakListener(getUtilManager()), getPlugin());

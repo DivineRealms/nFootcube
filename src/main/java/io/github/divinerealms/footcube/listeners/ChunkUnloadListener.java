@@ -13,15 +13,15 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 public class ChunkUnloadListener implements Listener {
   private final Physics physics;
 
-  public ChunkUnloadListener(final UtilManager utilManager) {
+  public ChunkUnloadListener(UtilManager utilManager) {
     this.physics = utilManager.getPhysics();
   }
 
   @EventHandler
-  public void onUnloadChunk(final ChunkUnloadEvent event) {
-    final Entity[] entities;
+  public void onUnloadChunk(ChunkUnloadEvent event) {
+    Entity[] entities;
     for (int length = (entities = event.getChunk().getEntities()).length, i = 0; i < length; ++i) {
-      final Entity entity = entities[i];
+      Entity entity = entities[i];
       if (!(entity instanceof Slime)) return;
       if (!getPhysics().getCubes().contains(entity)) return;
       getPhysics().getCubes().remove((Slime) entity);

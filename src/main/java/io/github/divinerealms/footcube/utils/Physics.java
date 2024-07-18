@@ -6,6 +6,7 @@ import io.github.divinerealms.footcube.managers.UtilManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.*;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -21,7 +22,6 @@ import java.util.*;
 public class Physics {
   private final Plugin plugin;
   private final Server server;
-  private final Config config;
   private final Logger logger;
   private final PotionEffect potionEffect = new PotionEffect(PotionEffectType.JUMP, 10, -3, false);
   private final HashMap<UUID, Vector> velocities = new HashMap<>();
@@ -29,16 +29,18 @@ public class Physics {
   private final HashMap<UUID, Double> charges = new HashMap<>();
   private final Map<UUID, Deque<Location>> lastLocations = new HashMap<>();
   private final HashSet<Slime> cubes = new HashSet<>();
+  @Getter private static final YamlConfiguration config = Config.getConfig("config.yml");
   private double regularKickLimit, chargedKickLimit, kickPower, chargeRefillSpeed;
+  private boolean cubeEffectEnabled, debugBallHits, soundsEnabled;
   @Setter private double power = 0.4, charge = 0, total;
   private Sound soundMove, soundKick;
   private EntityEffect cubeEffect;
 
-  public Physics(final Plugin plugin, final UtilManager utilManager) {
+  public Physics(Plugin plugin, UtilManager utilManager) {
     this.plugin = plugin;
     this.server = plugin.getServer();
-    this.config = utilManager.getConfig();
     this.logger = utilManager.getLogger();
+    reload();
   }
 
   public void reload() {
@@ -46,44 +48,48 @@ public class Physics {
     this.chargedKickLimit = getConfig().getDouble("cube.power-limit.charged-kick");
     this.regularKickLimit = getConfig().getDouble("cube.power-limit.regular-kick");
     this.chargeRefillSpeed = getConfig().getDouble("cube.power-limit.charge-refill");
-    this.soundMove = getConfig().getSound("cube.sounds.move");
-    this.soundKick = getConfig().getSound("cube.sounds.kick");
-    this.cubeEffect = getConfig().getEntityEffect("cube.effect.type");
+    this.soundMove = Sound.valueOf(getConfig().getString("cube.sounds.move"));
+    this.soundKick = Sound.valueOf(getConfig().getString("cube.sounds.kick"));
+    this.cubeEffect = EntityEffect.valueOf(getConfig().getString("cube.effect.type"));
+    this.cubeEffectEnabled = getConfig().getBoolean("cube.effect.enabled");
+    this.debugBallHits = getConfig().getBoolean("debug.ball-hits");
+    this.soundsEnabled = getConfig().getBoolean("cube.sounds.enabled");
+
     removeCubes();
   }
 
-  public String format(final Double value) {
+  public String format(Double value) {
     return String.format("%.2f", value);
   }
 
-  public Vector getLastMoveVector(final UUID playerID) {
-    final Vector defaultLocation = new Vector(0, 0, 0);
-    final Deque<Location> locations = getLastLocations().get(playerID);
+  public Vector getLastMoveVector(UUID playerID) {
+    Vector defaultLocation = new Vector(0, 0, 0);
+    Deque<Location> locations = getLastLocations().get(playerID);
     if (locations == null) return defaultLocation;
-    final Location last = locations.poll();
-    final Location secondLast = locations.poll();
+    Location last = locations.poll();
+    Location secondLast = locations.poll();
     if (last == null | secondLast == null) return defaultLocation;
-    final Vector vector = last.toVector().subtract(secondLast.toVector());
+    Vector vector = last.toVector().subtract(secondLast.toVector());
     locations.add(last);
     locations.add(secondLast);
     return vector;
   }
 
-  public double getTotalKickPower(final UUID playerID) {
+  public double getTotalKickPower(UUID playerID) {
     setPower(0.8 + getLastMoveVector(playerID).length());
     setCharge(getCharges().containsKey(playerID) ? getCharges().get(playerID) * 8 : 0);
     setTotal(((getCharge() != 0) ? (getCharge() * getPower() * getChargedKickLimit()) : (getPower() * getRegularKickLimit())) * getKickPower());
     return getTotal();
   }
 
-  public void spawnCube(final Location location) {
-    final Slime cube = (Slime) location.getWorld().spawnEntity(location, EntityType.SLIME);
+  public void spawnCube(Location location) {
+    Slime cube = (Slime) location.getWorld().spawnEntity(location, EntityType.SLIME);
     cube.setRemoveWhenFarAway(false);
     cube.setSize(1);
     getCubes().add(cube);
   }
 
-  public Location getDistance(final Location firstLocation, final Location secondLocation) {
+  public Location getDistance(Location firstLocation, Location secondLocation) {
     firstLocation.add(0, -1, 0);
     firstLocation.subtract(secondLocation).add(0, -1.5, 0);
     return firstLocation;
@@ -93,19 +99,19 @@ public class Physics {
     if (!getKicked().isEmpty())
       getKicked().entrySet().removeIf(entry -> System.currentTimeMillis() > getKicked().get(entry.getKey()) + 1000L);
 
-    for (final UUID playerID : getCharges().keySet()) {
-      final Player player = getServer().getPlayer(playerID);
-      final double charge = getCharges().get(playerID);
-      final double nextCharge = 1 - (1 - charge) * getChargeRefillSpeed();
+    for (UUID playerID : getCharges().keySet()) {
+      Player player = getServer().getPlayer(playerID);
+      double charge = getCharges().get(playerID);
+      double nextCharge = 1 - (1 - charge) * getChargeRefillSpeed();
       getCharges().put(playerID, nextCharge);
       player.setExp((float) nextCharge);
     }
 
-    final Iterator<Slime> cubesIterator = getCubes().iterator();
+    Iterator<Slime> cubesIterator = getCubes().iterator();
 
     while (cubesIterator.hasNext()) {
-      final Slime cube = cubesIterator.next();
-      final UUID cubeID = cube.getUniqueId();
+      Slime cube = cubesIterator.next();
+      UUID cubeID = cube.getUniqueId();
       Vector oldV = cube.getVelocity();
       if (getVelocities().containsKey(cubeID)) oldV = getVelocities().get(cubeID);
       if (cube.isDead()) cubesIterator.remove();
@@ -116,12 +122,12 @@ public class Physics {
 
       final Collection<? extends Player> onlinePlayers = getServer().getOnlinePlayers();
 
-      for (final Player player : onlinePlayers) {
+      for (Player player : onlinePlayers) {
         if (player.getGameMode() == GameMode.SURVIVAL) {
 //          double delta = cube.getLocation().distance(player.getLocation());
-          final Location distance = getDistance(cube.getLocation(), player.getLocation());
+          Location distance = getDistance(cube.getLocation(), player.getLocation());
           if (distance.getY() < 0.0) distance.add(0, 2.5, 0);
-          final double delta = distance.length();
+          double delta = distance.length();
           if (delta < 1.2) {
             if (delta < 0.8 && newV.length() > 0.5) newV.multiply(0.5 / newV.length());
             double power = getLastMoveVector(player.getUniqueId()).length() / 3 + oldV.length() / 6;
@@ -149,29 +155,32 @@ public class Physics {
 
       if (sound) cube.getWorld().playSound(cube.getLocation(), getSoundMove(), 0.5F, 1F);
 
-      for (final Player player : onlinePlayers) {
+      for (Player player : onlinePlayers) {
         if (player.getGameMode() == GameMode.SURVIVAL) {
           double delta2 = getDistance(cube.getLocation(), player.getLocation()).length();
           if (delta2 < newV.length() * 1.3) {
-            final Vector loc = cube.getLocation().toVector();
-            final Vector nextLoc = new Vector(loc.getX(), loc.getY(), loc.getZ()).add(newV);
+            Vector loc = cube.getLocation().toVector();
+            Vector nextLoc = new Vector(loc.getX(), loc.getY(), loc.getZ()).add(newV);
             boolean rightDirection = true;
-            final Vector pDir = new Vector(player.getLocation().getX() - loc.getX(), 0, player.getLocation().getZ() - loc.getZ());
-            final Vector cDir = new Vector(newV.getX(), 0, newV.getZ()).normalize();
+            Vector pDir = new Vector(player.getLocation().getX() - loc.getX(), 0, player.getLocation().getZ() - loc.getZ());
+            Vector cDir = new Vector(newV.getX(), 0, newV.getZ()).normalize();
             int px = 1, pz = 1, cx = 1, cz = 1;
             if (pDir.getX() < 0) px = -1;
             if (pDir.getZ() < 0) pz = -1;
             if (cDir.getX() < 0) cx = -1;
             if (cDir.getZ() < 0) cz = -1;
-            if ((px != cx && pz != cz) || ((px != cx || pz != cz) && (cx * pDir.getX() <= cx * cz * px * cDir.getZ() || cz * pDir.getZ() <= cz * cx * pz * cDir.getX())))
+            if ((px != cx && pz != cz) || ((px != cx || pz != cz) && (cx * pDir.getX() <= cx * cz * px * cDir.getZ() || cz * pDir.getZ() <= cz * cx * pz * cDir.getX()))) {
               rightDirection = false;
+            }
             if (rightDirection && loc.getY() < player.getLocation().getY() + 2 && loc.getY() > player.getLocation().getY() - 1 && nextLoc.getY() < player.getLocation().getY() + 2 && nextLoc.getY() > player.getLocation().getY() - 1) {
               double a = newV.getZ() / newV.getX();
               double b = loc.getZ() - a * loc.getX();
               double c = player.getLocation().getX();
               double d = player.getLocation().getZ();
-              final double D = Math.abs(a * c - d + b) / Math.sqrt(a * a + 1);
-              if (D < 0.8D) newV.multiply(delta2 / newV.length());
+              double D = Math.abs(a * c - d + b) / Math.sqrt(a * a + 1);
+              if (D < 0.8D) {
+                newV.multiply(delta2 / newV.length());
+              }
             }
           }
         }
@@ -180,7 +189,9 @@ public class Physics {
       cube.setVelocity(newV);
       cube.addPotionEffect(getPotionEffect());
 
-      if (getConfig().getBoolean("cube.effect.enabled")) cube.playEffect(getCubeEffect());
+      if (isCubeEffectEnabled()) {
+        cube.playEffect(getCubeEffect());
+      }
 
       getVelocities().put(cubeID, newV);
     }
@@ -188,16 +199,20 @@ public class Physics {
 
   public void removeCubes() {
     final List<Entity> entities = getServer().getWorlds().get(0).getEntities();
-    for (final Entity entity : entities) if (entity instanceof Slime) entity.remove();
+    for (final Entity entity : entities) {
+      if (entity instanceof Slime) entity.remove();
+    }
   }
 
-  public void debug(final Player player) {
-    if (getConfig().getBoolean("debug.ball-hits"))
+  public void debug(Player player) {
+    if (isDebugBallHits()) {
       getLogger().send("fcfa", Lang.DEBUG_BALL_HITS.getConfigValue(new String[]{player.getName(), format(getPower()), format(getCharge()), format(getKickPower()), format(getTotal())}));
+    }
   }
 
-  public void playSound(final Slime cube, final boolean isKick) {
-    if (getConfig().getBoolean("cube.sounds.enabled"))
+  public void playSound(Slime cube, boolean isKick) {
+    if (isSoundsEnabled()) {
       cube.getWorld().playSound(cube.getLocation(), (isKick ? getSoundKick() : getSoundMove()), 0.75F, 1F);
+    }
   }
 }

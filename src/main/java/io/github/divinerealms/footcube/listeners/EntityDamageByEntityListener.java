@@ -24,7 +24,7 @@ public class EntityDamageByEntityListener implements Listener {
   private final Cooldown cooldown;
   private final Physics physics;
 
-  public EntityDamageByEntityListener(final Plugin plugin, final UtilManager utilManager) {
+  public EntityDamageByEntityListener(Plugin plugin, UtilManager utilManager) {
     this.plugin = plugin;
     this.server = plugin.getServer();
     this.logger = utilManager.getLogger();
@@ -33,14 +33,14 @@ public class EntityDamageByEntityListener implements Listener {
   }
 
   @EventHandler
-  public void onEntityDamageByEntity(final EntityDamageByEntityEvent event) {
+  public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
     if (!(event.getEntity() instanceof Slime)) return;
     if (!getPhysics().getCubes().contains((Slime) event.getEntity())) return;
     if (!(event.getDamager() instanceof Player)) return;
     if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
 
-    final Slime cube = (Slime) event.getEntity();
-    final Player player = (Player) event.getDamager();
+    Slime cube = (Slime) event.getEntity();
+    Player player = (Player) event.getDamager();
 
     if (player.getGameMode() == GameMode.CREATIVE && player.hasPermission("nfootcube.clearcube")) {
       // TODO: disable removal in matches
@@ -50,7 +50,7 @@ public class EntityDamageByEntityListener implements Listener {
 
     if (player.getGameMode() != GameMode.SURVIVAL) return;
     if (getCooldown().isCubeKickCooldownEnabled()) {
-      final long timeLeft = getCooldown().getTimeleftMillis(player.getUniqueId(), getCooldown().getCubeKickCooldown());
+      long timeLeft = getCooldown().getTimeleftMillis(player.getUniqueId(), getCooldown().getCubeKickCooldown());
       if (timeLeft > 0) {
         event.setCancelled(true);
         return;
